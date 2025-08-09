@@ -12,7 +12,7 @@ env:
   EC2_SSH_USER: ec2-user
   PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
   CONTAINER_NAME: ${{ secrets.DEV_CONTAINER_NAME }}
-  APP_PORT: "8089"
+  APP_PORT: "8080"
 
 jobs:
   build-and-push-docker:
