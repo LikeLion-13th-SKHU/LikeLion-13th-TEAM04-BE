@@ -26,9 +26,9 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-
-		- name: Gradle permissions
-        run: chmod +x ./gradlew
+		
+    - name: Build with Gradle
+      run: ./gradlew clean build -x test
 
     - name: Set up application-prod.yml
       run: |
