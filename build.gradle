@@ -55,11 +55,13 @@ dependencies {
 
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
-    
     testImplementation 'org.springframework.security:spring-security-test'
 
     // 이건 테스트용
     testImplementation 'com.h2database:h2'
+
+	// 웹소켓
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }
 
 tasks.named('test') {
