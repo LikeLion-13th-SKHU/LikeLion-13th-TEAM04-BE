@@ -25,7 +25,7 @@ import java.util.Map;
 public class MemberController {
 
     private final MemberService memberService;
-    // private final FileService fileService; // 파일 업로드 서비스 (나중에 구현해야 하는 부분임)
+    // private final FileService fileService; 
 
 
 
@@ -62,8 +62,8 @@ public class MemberController {
             @Valid @RequestBody MemberUpdateRequestDto requestDto,
             Authentication authentication) {
         log.info("Updating my info for user: {}", authentication.getName());
-        String email = authentication.getName(); // 🚨 수정: Long으로 변환하지 않고 email을 그대로 사용
-        MemberInfoResponseDto response = memberService.updateMemberByEmail(email, requestDto); // 🚨 수정: 새로운 서비스 메소드 호출
+        String email = authentication.getName(); 
+        MemberInfoResponseDto response = memberService.updateMemberByEmail(email, requestDto); 
         return ResponseEntity.ok(response);
     }
 
