@@ -15,13 +15,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/login/oauth2")  // 경로를 첫 번째 예시와 동일하게 수정
+@RequestMapping("/login/oauth2")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
 
-    // Google OAuth2 콜백 처리 (GET 방식으로 변경, 경로도 수정)
+
     @GetMapping("/code/google")
     public LoginResponseDto googleCallback(@RequestParam(name = "code") String code) {
         return authService.googleLogin(code);

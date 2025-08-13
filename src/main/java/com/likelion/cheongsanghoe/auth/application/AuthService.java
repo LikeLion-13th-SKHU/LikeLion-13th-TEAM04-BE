@@ -44,7 +44,7 @@ public class AuthService {
 
 
     public LoginResponseDto googleLogin(String code) {
-        // 구글에서 액세스 토큰 획득
+
         String accessToken = getGoogleAccessToken(code);
 
         // 구글 사용자 정보 조회

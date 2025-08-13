@@ -62,8 +62,8 @@ public class MemberController {
             @Valid @RequestBody MemberUpdateRequestDto requestDto,
             Authentication authentication) {
         log.info("Updating my info for user: {}", authentication.getName());
-        String email = authentication.getName(); // 🚨 수정: Long으로 변환하지 않고 email을 그대로 사용
-        MemberInfoResponseDto response = memberService.updateMemberByEmail(email, requestDto); // 🚨 수정: 새로운 서비스 메소드 호출
+        String email = authentication.getName();
+        MemberInfoResponseDto response = memberService.updateMemberByEmail(email, requestDto);
         return ResponseEntity.ok(response);
     }
 
