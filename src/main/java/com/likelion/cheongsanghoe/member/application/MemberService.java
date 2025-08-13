@@ -27,7 +27,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
 
-    // 🚨 [수정] : 기존 createMemberProfile 메소드를 아래 메소드로 완전히 교체합니다.
     @Transactional
     public MemberInfoResponseDto createMemberProfileByEmail(String email, MemberUpdateRequestDto requestDto) {
         log.info("Creating member profile for user email: {}", email);
@@ -65,7 +64,7 @@ public class MemberService {
                 .experienceYears(requestDto.getExperienceYears())
                 .education(requestDto.getEducation())
                 .salaryExpectation(requestDto.getSalaryExpectation())
-                .status(MemberStatus.ACTIVE) // 🚨 [수정] : 회원의 초기 상태를 ACTIVE로 설정합니다.
+                .status(MemberStatus.ACTIVE) 
                 .build();
 
         Member savedMember = memberRepository.save(member);
@@ -74,7 +73,6 @@ public class MemberService {
         return MemberInfoResponseDto.of(savedMember);
     }
 
-    // 🚨 [수정] : 기존 updateMember 메소드를 아래 메소드로 완전히 교체합니다.
     @Transactional
     public MemberInfoResponseDto updateMemberByEmail(String email, MemberUpdateRequestDto requestDto) {
         log.info("Updating member info for user email: {}", email);
@@ -116,7 +114,6 @@ public class MemberService {
         return MemberInfoResponseDto.of(member);
     }
 
-    // 🚨 [수정] : 기존 withdrawMember 메소드를 아래 메소드로 완전히 교체합니다.
     @Transactional
     public void withdrawMemberByEmail(String email) {
         log.info("Withdrawing member for user email: {}", email);
@@ -130,7 +127,6 @@ public class MemberService {
         log.info("Member withdrawn successfully. MemberId: {}", member.getId());
     }
 
-    // 🚨 [수정] : 기존 getMemberInfo 메소드를 아래 메소드로 완전히 교체합니다.
     @Transactional(readOnly = true)
     public MemberInfoResponseDto getMemberInfoByEmail(String email) {
         User user = userRepository.findByEmail(email)
@@ -140,7 +136,6 @@ public class MemberService {
         return MemberInfoResponseDto.of(member);
     }
 
-    // --- 아래는 기존에 있던 다른 메소드들입니다. 그대로 유지하면 됩니다. ---
 
     public MemberInfoResponseDto getMemberById(Long memberId) {
         log.info("Getting member info by memberId: {}", memberId);
