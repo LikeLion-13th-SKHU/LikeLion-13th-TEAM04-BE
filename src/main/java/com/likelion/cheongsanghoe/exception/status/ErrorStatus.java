@@ -30,7 +30,7 @@ public enum ErrorStatus {
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "MEMBER409", "이미 사용 중인 닉네임입니다."),
     DUPLICATE_PHONE_NUMBER(HttpStatus.CONFLICT, "MEMBER409", "이미 사용 중인 전화번호입니다."),
     MEMBER_SUSPENDED(HttpStatus.FORBIDDEN, "MEMBER403", "정지된 회원입니다."),//정지된 회원을 넣은 이유는 구인구직 사이트에서 사기 치는 유저가 생길 가능성을 생각해서 넣었습니다.
-    MEMBER_NOT_ACTIVE(HttpStatus.FORBIDDEN, "MEMBER403", "활성화되지 않은 회원입니다.");
+    MEMBER_NOT_ACTIVE(HttpStatus.FORBIDDEN, "MEMBER403", "활성화되지 않은 회원입니다."),
 
     //chat
     CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT404", "존재하지 않는 채팅방입니다."),

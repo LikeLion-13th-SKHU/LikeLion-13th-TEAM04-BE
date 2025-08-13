@@ -28,6 +28,15 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    // Swagger / OpenAPI 화이트리스트
+    private static final String[] SWAGGER_WHITELIST = {
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-resources/**",
+            "/webjars/**"
+    };
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
@@ -38,11 +47,15 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
+                        // Swagger 문서/리소스는 인증 없이 허용
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
 
                         .requestMatchers(
                                 "/login/oauth2/**",
                                 "/auth/**",
-                                "/error", "/favicon.ico"
+                                "/actuator/health",
+                                "/error",
+                                "/favicon.ico"
                         ).permitAll()
 
 
