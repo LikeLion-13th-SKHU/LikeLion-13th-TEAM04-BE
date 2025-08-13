@@ -11,7 +11,7 @@ public class JacksonConfig {
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
-        // Java 8의 LocalDateTime 타입을 JSON으로 변환해주는 모듈을 등록합니다.
+
         objectMapper.registerModule(new JavaTimeModule());
         return objectMapper;
     }
