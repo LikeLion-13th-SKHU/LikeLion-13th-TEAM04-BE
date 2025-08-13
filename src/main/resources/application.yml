@@ -13,8 +13,8 @@ spring:
       client:
         registration:
           google:
-            client-id:
-            client-secret:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             redirect-uri: http://localhost:8080/login/oauth2/code/google
             scope:
               - email
@@ -30,11 +30,12 @@ spring:
         show_sql: true
     open-in-view: false
 
-    jwt:
-      secret: ${JWT_SECRET}
-      access-token-validity-in-milliseconds: ${JWT_ACCESS_TOKEN_VALIDITY_IN_MILLISECONDS}
-    client-id:
-    client-secret:
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-validity-in-milliseconds: ${JWT_ACCESS_TOKEN_VALIDITY_IN_MILLISECONDS:3600000}
+
+client-id: ${CLIENT_ID:demo-client-id}
+client-secret: ${CLIENT_SECRET:demo-client-secret}
 
 logging:
   level:
