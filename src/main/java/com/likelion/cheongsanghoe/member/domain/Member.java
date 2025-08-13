@@ -72,7 +72,6 @@ public class Member {
     private MemberStatus status;
 
 
-    // 🚨 [수정] : User 엔티티와 동일한 방식으로 변경
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -81,7 +80,7 @@ public class Member {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // 🚨 [수정] : Builder가 status를 받을 수 있도록 생성자에 추가
+
     @Builder
     public Member(User user, String nickname, String phoneNumber, String address,
                   String detailAddress, String zipCode, String bio, String profileImageUrl,
@@ -102,10 +101,9 @@ public class Member {
         this.experienceYears = experienceYears;
         this.education = education;
         this.salaryExpectation = salaryExpectation;
-        this.status = status; // status 필드 초기화
+        this.status = status;
     }
 
-    // 12개 파라미터를 모두 받는 updateProfile 메소드
     public void updateProfile(String nickname, String phoneNumber, String address, String detailAddress,
                               String zipCode, String bio, String jobCategory, String preferredLocation,
                               String skills, Integer experienceYears, String education,
