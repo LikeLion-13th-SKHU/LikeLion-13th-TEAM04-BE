@@ -32,6 +32,11 @@ public enum ErrorStatus {
     MEMBER_SUSPENDED(HttpStatus.FORBIDDEN, "MEMBER403", "정지된 회원입니다."),//정지된 회원을 넣은 이유는 구인구직 사이트에서 사기 치는 유저가 생길 가능성을 생각해서 넣었습니다.
     MEMBER_NOT_ACTIVE(HttpStatus.FORBIDDEN, "MEMBER403", "활성화되지 않은 회원입니다.");
 
+    //chat
+    CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT404", "존재하지 않는 채팅방입니다."),
+    NOT_CHAT_ROOM_MEMBER(HttpStatus.FORBIDDEN, "CHAT403", "해당 방의 참여자가 아닙니다."),
+    NOT_ALLOWED_SELF_CHAT(HttpStatus.BAD_REQUEST, "CHAT400", "자기 자신과는 채팅방을 생성할 수 없습니다.");
+
     private final HttpStatus status;
     private final String code;
     private final String message;
