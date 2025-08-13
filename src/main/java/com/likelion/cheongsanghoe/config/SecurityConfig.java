@@ -38,20 +38,20 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
-                        // 기존의 모든 허용(permitAll) 규칙은 그대로 유지합니다.
+                       
                         .requestMatchers(
                                 "/login/oauth2/**",
                                 "/auth/**",
                                 "/error", "/favicon.ico"
                         ).permitAll()
 
-                        // 🚨 중요: 마이페이지 및 회원 관련 API는 인증이 필요하다고 명시적으로 선언합니다.
+                      
                         .requestMatchers("/api/members/**").authenticated()
 
-                        // 관리자 API 규칙도 그대로 유지합니다.
+                   
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // 그 외 모든 요청은 인증이 필요하다는 규칙도 그대로 유지합니다.
+                    
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(AbstractHttpConfigurer::disable)
