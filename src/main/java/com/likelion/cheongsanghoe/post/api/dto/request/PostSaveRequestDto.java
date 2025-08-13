@@ -1,5 +1,6 @@
 package com.likelion.cheongsanghoe.post.api.dto.request;
 
+import com.likelion.cheongsanghoe.post.domain.Category;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -7,8 +8,8 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 public record PostSaveRequestDto(
-        @NotNull(message = "카테고리를 필수로 입력하세요")
-        Long categoryId,
+        @NotNull(message = "카테고리를 선택하세요")
+        Category category,
         @NotBlank (message = "제목을 입력하세요")
         String title,
         @NotBlank(message = "내용을 입력하세요")
@@ -23,6 +24,7 @@ public record PostSaveRequestDto(
         int count,
         @NotBlank(message = "일하는 기간을 입력하세요")
         String work_period,
+        String tags,
         LocalDate create_at
 ) {
 }

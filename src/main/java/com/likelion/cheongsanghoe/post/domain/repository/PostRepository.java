@@ -1,6 +1,6 @@
 package com.likelion.cheongsanghoe.post.domain.repository;
 
-import com.likelion.cheongsanghoe.category.domain.Category;
+import com.likelion.cheongsanghoe.post.domain.Category;
 import com.likelion.cheongsanghoe.post.domain.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,6 +1,5 @@
 package com.likelion.cheongsanghoe.post.domain;
 
-import com.likelion.cheongsanghoe.category.domain.Category;
 import com.likelion.cheongsanghoe.post.api.dto.request.PostUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -30,8 +29,8 @@ public class Post {
     private String work_period;
     private LocalDate create_at;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @Enumerated(EnumType.STRING)
+    @Column(length =20)
     private Category category;
 
     @Builder

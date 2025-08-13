@@ -1,5 +1,6 @@
 package com.likelion.cheongsanghoe.post.api.dto.response;
 
+import com.likelion.cheongsanghoe.post.domain.Category;
 import com.likelion.cheongsanghoe.post.domain.Post;
 import lombok.Builder;
 
@@ -16,7 +17,7 @@ public record PostInfoResponseDto(
         int count,
         String work_period,
         LocalDate create_at,
-        String category
+        Category category
 ) {
     public static PostInfoResponseDto from(Post post){
         return PostInfoResponseDto.builder()
@@ -29,7 +30,7 @@ public record PostInfoResponseDto(
                 .count(post.getCount())
                 .work_period(post.getWork_period())
                 .create_at(post.getCreate_at())
-                .category(post.getCategory().getName())
+                .category(post.getCategory())
                 .build();
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,16 +30,13 @@ public class PostController {
 
     //공고 생성
     @PostMapping("/save")
-    public Response<String> postSave(@RequestBody @Valid PostSaveRequestDto postSaveRequestDto) {
-        postService.postSave(postSaveRequestDto);
-        return Response.success(SuccessStatus.CREATED,null);
+    public ResponseEntity<Response<Long>> postSave(@RequestBody @Valid PostSaveRequestDto postSaveRequestDto, @RequestHeader("userId") Long userId) {
+        Response<Long> response = postService.postSave(postSaveRequestDto, userId);
+        return ResponseEntity
+                .status(SuccessStatus.CREATED.getStatus())
+                .body(response);
     }
-    //카테고리 id로 해당 카테고리 있는 공고 조회
-    @GetMapping("/category/{categoryId}")
-    public Response<PostListResponseDto_Detail> PostFindCateogoryAll(@PathVariable("categoryId")Long categoryId) {
-        PostListResponseDto_Detail postListResponseDto = postService.postFindCategoryAll(categoryId);
-        return Response.success(SuccessStatus.SUCCESS,postListResponseDto);
-    }
+
     //postId로 공고 상세 조회
     @GetMapping("/{postId}")
     public Response<PostInfoResponseDto> PostFindById(@PathVariable("postId")Long postId) {
