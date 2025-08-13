@@ -3,10 +3,10 @@ spring:
     active: prod
 
   datasource:
-    url: jdbc:mysql://localhost:3306/cheongsanghoe
-    username: root
-    password: '0310'
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    driver-class-name: ${spring.datasource.driver-class-name}
 
   security:
     oauth2:
@@ -19,7 +19,6 @@ spring:
             scope:
               - email
               - profile
-
 
   jpa:
     hibernate:
@@ -41,4 +40,3 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace
-

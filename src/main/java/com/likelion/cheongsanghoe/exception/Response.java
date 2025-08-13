@@ -5,7 +5,7 @@ import com.likelion.cheongsanghoe.exception.status.ErrorStatus;
 import com.likelion.cheongsanghoe.exception.status.SuccessStatus;
 import lombok.Getter;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)         // null 값을 가지는 필드는 Json 응답에 미포함
 @Getter
 public class Response<T> {
     private boolean success;
