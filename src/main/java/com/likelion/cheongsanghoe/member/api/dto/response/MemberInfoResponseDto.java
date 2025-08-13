@@ -29,7 +29,7 @@ public class MemberInfoResponseDto {
     private String statusDescription;
     private Integer reportCount;
 
-    // 🚨 JSON으로 변환될 때의 날짜/시간 형식을 지정하는 어노테이션
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
