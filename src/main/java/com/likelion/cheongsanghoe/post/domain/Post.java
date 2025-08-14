@@ -25,9 +25,9 @@ public class Post {
     private int salary;
     private String work_time;
     private String deadline;
-    private int count;
+    private int num;
     private String work_period;
-    private LocalDate create_at;
+    private LocalDate createAt;
 
     @Enumerated(EnumType.STRING)
     @Column(length =20)
@@ -35,16 +35,16 @@ public class Post {
 
     @Builder
     private Post(String title, String content, String location, int salary, String work_time, String deadline,
-                 int count, String work_period, LocalDate create_at, Category category ) {
+                 int num, String work_period, LocalDate createAt, Category category ) {
         this.title = title;
         this.content = content;
         this.location = location;
         this.salary = salary;
         this.work_time = work_time;
         this.deadline = deadline;
-        this.count = count;
+        this.num = num;
         this.work_period = work_period;
-        this.create_at = create_at;
+        this.createAt = createAt;
         this.category = category;
 
     }
@@ -52,7 +52,7 @@ public class Post {
     public void update(PostUpdateRequestDto postUpdateRequestDto) {
         this.title = postUpdateRequestDto.title();
         this.salary = postUpdateRequestDto.salary();
-        this.count = postUpdateRequestDto.count();
+        this.num = postUpdateRequestDto.num();
         this.work_time = postUpdateRequestDto.work_time();
         this.work_period = postUpdateRequestDto.work_period();
         this.content = postUpdateRequestDto.content();

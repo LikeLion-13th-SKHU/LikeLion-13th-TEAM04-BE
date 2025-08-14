@@ -33,10 +33,10 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RestTemplate restTemplate;
 
-    @Value("${client-id}")
+    @Value("55848478880-rnds6ucgu8aov43ua89hd599i6gv3k5h.apps.googleusercontent.com")
     private String googleClientId;
 
-    @Value("${client-secret}")
+    @Value("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")
     private String googleClientSecret;
 
     @Value("http://localhost:8080/login/oauth2/code/google")

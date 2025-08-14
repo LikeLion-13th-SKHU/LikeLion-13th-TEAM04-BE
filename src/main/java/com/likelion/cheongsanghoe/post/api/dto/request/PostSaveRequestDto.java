@@ -21,10 +21,10 @@ public record PostSaveRequestDto(
         @NotBlank(message = "일하는 시간을 입력하세요")
         String work_time,
         String deadline,
-        int count,
+        int num,
         @NotBlank(message = "일하는 기간을 입력하세요")
         String work_period,
         String tags,
-        LocalDate create_at
+        LocalDate createAt
 ) {
 }

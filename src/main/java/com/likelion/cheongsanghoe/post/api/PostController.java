@@ -7,6 +7,8 @@ import com.likelion.cheongsanghoe.post.api.dto.request.PostUpdateRequestDto;
 import com.likelion.cheongsanghoe.post.api.dto.response.*;
 import com.likelion.cheongsanghoe.post.application.PostService;
 import com.likelion.cheongsanghoe.post.api.dto.request.PostSaveRequestDto;
+import com.likelion.cheongsanghoe.post.application.SearchService;
+import com.likelion.cheongsanghoe.post.domain.Category;
 import com.likelion.cheongsanghoe.post.domain.Post;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/posts")
 public class PostController {
     private final PostService postService;
+    private final SearchService searchService;
 
     //공고 생성
     @PostMapping("/save")
@@ -45,30 +48,37 @@ public class PostController {
     }
     //공고 전체 조회(요약 정보)
     @GetMapping
-    public Response<PostPageResponseDto> PostFindAll(
-            //PageableDefault로 페이지네이션 기본값 적용
-            @PageableDefault(size = 10, sort = "postId", direction = Sort.Direction.ASC) Pageable pageable) {//Pageable 파라미터 추가
-        Page<Post> postPage = postService.getPostPage(pageable);//페이지네이션 된 결과를 가져온다
-        //Post 엔티티를 PostSummaryResponseDto로 변환
-        List<PostSummaryResponseDto> posts = postPage.getContent().stream()
-                .map(PostSummaryResponseDto::from)
-                .collect(Collectors.toList());
-        //PaginationDto 생성(페이지화 된 정보(postPage)를 가져온다)
+    public Response<PostPageResponseDto> postFindAll(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Category category,
+            //PageableDefault로 페이지네이션 기본값 적용, pageable 파라미터 추가
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<PostSummaryResponseDto> postPageDto;
+        //검색 조건이 있으면 검색 서비스 호출
+        if ((keyword != null && !keyword.trim().isEmpty()) || category != null){
+            postPageDto = searchService.searchPosts(keyword, category, pageable);
+        }else{
+            postPageDto = postService.getPostPage(pageable).map(PostSummaryResponseDto::from);
+        }
+
+        //PaginationDto 생성(페이지화 된 정보(postPageDto)를 가져온다)
         PaginationDto paginationDto = new PaginationDto(
-                postPage.getNumber() + 1, //0부터 시작해서 +1
-                postPage.getTotalPages(), //총 페이지수
-                postPage.getTotalElements(), //총 데이터 항목 수
-                postPage.getSize() //해당 페이지의 보여지는 항목 수
+                postPageDto.getNumber() + 1, //0부터 시작해서 +1
+                postPageDto.getTotalPages(), //총 페이지수
+                postPageDto.getTotalElements(), //총 데이터 항목 수
+                postPageDto.getSize() //해당 페이지의 보여지는 항목 수
         );
         //게시글 리스트와 페이지네이션 정보를 합친다
-        PostPageResponseDto postPageResponseDto = new PostPageResponseDto(posts, paginationDto);
+        PostPageResponseDto postPageResponseDto = new PostPageResponseDto(postPageDto.getContent(), paginationDto);
         return Response.success(SuccessStatus.SUCCESS,postPageResponseDto);
     }
     //postId로 공고 수정
     @PatchMapping("/{postId}")
-    public Response<String> postUpdate(@PathVariable("postId")Long postId, @RequestBody PostUpdateRequestDto postUpdateRequestDto) {
+    public Response<PostInfoResponseDto> postUpdate(@PathVariable("postId")Long postId, @RequestBody PostUpdateRequestDto postUpdateRequestDto) {
         postService.postUpdate(postId, postUpdateRequestDto);
-        return Response.success(SuccessStatus.SUCCESS,null);
+        PostInfoResponseDto postInfoResponseDto = postService.getPostId(postId);
+        return Response.success(SuccessStatus.SUCCESS,postInfoResponseDto);
     }
     //공고 삭제
     @DeleteMapping("/{postId}")
@@ -78,3 +88,4 @@ public class PostController {
     }
 
 }
+

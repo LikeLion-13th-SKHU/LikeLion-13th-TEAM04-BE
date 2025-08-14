@@ -14,9 +14,9 @@ public record PostInfoResponseDto(
         int salary,
         String work_time,
         String deadline,
-        int count,
+        int num,
         String work_period,
-        LocalDate create_at,
+        LocalDate createAt,
         Category category
 ) {
     public static PostInfoResponseDto from(Post post){
@@ -27,9 +27,9 @@ public record PostInfoResponseDto(
                 .salary(post.getSalary())
                 .work_time(post.getWork_time())
                 .deadline(post.getDeadline())
-                .count(post.getCount())
+                .num(post.getNum())
                 .work_period(post.getWork_period())
-                .create_at(post.getCreate_at())
+                .createAt(post.getCreateAt())
                 .category(post.getCategory())
                 .build();
     }

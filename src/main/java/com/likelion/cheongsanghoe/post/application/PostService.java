@@ -42,9 +42,9 @@ public class PostService {
                 .salary(postSaveRequestDto.salary())
                 .work_time(postSaveRequestDto.work_time())
                 .deadline(postSaveRequestDto.deadline())
-                .count(postSaveRequestDto.count())
+                .num(postSaveRequestDto.num())
                 .work_period(postSaveRequestDto.work_period())
-                .create_at(LocalDate.now()) //실시간 서버 시간 적용
+                .createAt(LocalDate.now()) //실시간 서버 시간 적용
                 .category(postSaveRequestDto.category())
                 .build();
         postRepository.save(post);

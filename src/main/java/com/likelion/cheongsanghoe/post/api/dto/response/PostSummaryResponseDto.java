@@ -11,7 +11,7 @@ public record PostSummaryResponseDto(
         String title,
         String location,
         int salary,
-        LocalDate create_at
+        LocalDate createAt
 ) {
     public static PostSummaryResponseDto from(Post post){
         return PostSummaryResponseDto.builder()
@@ -19,7 +19,7 @@ public record PostSummaryResponseDto(
                 .title(post.getTitle())
                 .location(post.getLocation())
                 .salary(post.getSalary())
-                .create_at(post.getCreate_at())
+                .createAt(post.getCreateAt())
                 .build();
 
     }
