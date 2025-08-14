@@ -4,6 +4,7 @@ import com.likelion.cheongsanghoe.post.domain.Category;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
@@ -25,6 +26,7 @@ public record PostSaveRequestDto(
         @NotBlank(message = "일하는 기간을 입력하세요")
         String work_period,
         String tags,
+        MultipartFile image,
         LocalDate createAt
 ) {
 }

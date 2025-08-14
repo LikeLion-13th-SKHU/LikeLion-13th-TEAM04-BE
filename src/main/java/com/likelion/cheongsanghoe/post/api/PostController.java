@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,8 +33,8 @@ public class PostController {
     private final SearchService searchService;
 
     //공고 생성
-    @PostMapping("/save")
-    public ResponseEntity<Response<Long>> postSave(@RequestBody @Valid PostSaveRequestDto postSaveRequestDto, @RequestHeader("userId") Long userId) {
+    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response<Long>> postSave(@ModelAttribute @Valid PostSaveRequestDto postSaveRequestDto, @RequestHeader("userId") Long userId) {
         Response<Long> response = postService.postSave(postSaveRequestDto, userId);
         return ResponseEntity
                 .status(SuccessStatus.CREATED.getStatus())
@@ -52,7 +53,7 @@ public class PostController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Category category,
             //PageableDefault로 페이지네이션 기본값 적용, pageable 파라미터 추가
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "createAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<PostSummaryResponseDto> postPageDto;
         //검색 조건이 있으면 검색 서비스 호출
@@ -88,4 +89,5 @@ public class PostController {
     }
 
 }
+
 

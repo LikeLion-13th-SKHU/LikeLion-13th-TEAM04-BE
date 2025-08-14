@@ -13,6 +13,7 @@ public record PostInfoResponseDto(
         String location,
         int salary,
         String work_time,
+        String tags,
         String deadline,
         int num,
         String work_period,
@@ -26,6 +27,7 @@ public record PostInfoResponseDto(
                 .location(post.getLocation())
                 .salary(post.getSalary())
                 .work_time(post.getWork_time())
+                .tags(post.getTags())
                 .deadline(post.getDeadline())
                 .num(post.getNum())
                 .work_period(post.getWork_period())

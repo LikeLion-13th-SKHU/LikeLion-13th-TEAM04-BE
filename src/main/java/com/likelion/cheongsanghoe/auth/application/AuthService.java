@@ -85,6 +85,7 @@ public class AuthService {
             Member newMember = Member.builder()
                     .user(savedUser)
                     .nickname(name)
+                    .status(MemberStatus.ACTIVE)
                     .profileImageUrl(profileImage)
                     .build();
 

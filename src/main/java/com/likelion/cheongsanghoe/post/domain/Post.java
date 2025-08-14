@@ -24,9 +24,11 @@ public class Post {
     private String location;
     private int salary;
     private String work_time;
+    private String tags;
     private String deadline;
     private int num;
     private String work_period;
+    private String imageUrl;
     private LocalDate createAt;
 
     @Enumerated(EnumType.STRING)
@@ -34,18 +36,20 @@ public class Post {
     private Category category;
 
     @Builder
-    private Post(String title, String content, String location, int salary, String work_time, String deadline,
-                 int num, String work_period, LocalDate createAt, Category category ) {
+    private Post(String title, String content, String location, int salary, String work_time, String tags,String deadline,
+                 int num, String work_period, LocalDate createAt, Category category, String imageUrl ) {
         this.title = title;
         this.content = content;
         this.location = location;
         this.salary = salary;
         this.work_time = work_time;
+        this.tags = tags;
         this.deadline = deadline;
         this.num = num;
         this.work_period = work_period;
         this.createAt = createAt;
         this.category = category;
+        this.imageUrl = imageUrl;
 
     }
     //공고 수정
