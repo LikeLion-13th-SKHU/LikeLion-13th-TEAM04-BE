@@ -1,64 +1,64 @@
 plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.5.4'
-    id 'io.spring.dependency-management' version '1.1.7'
+	id 'java'
+	id 'org.springframework.boot' version '3.5.4'
+	id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.likelion'
 version = '0.0.1-SNAPSHOT'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
 }
 
 configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
 }
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 dependencies {
-    // 기존 의존성
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.mysql:mysql-connector-j'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// 기존 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // 추가 필요 의존성
-    // Security (Authentication, 인증/인가)
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+	// 추가 필요 의존성
+	// Security (Authentication, 인증/인가)
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    // Validation (@Valid, @NotNull 등)
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
+	// Validation (@Valid, @NotNull 등)
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-    // OAuth2 (소셜 로그인용)
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-    implementation 'com.google.code.gson:gson:2.10.1'
+	// OAuth2 (소셜 로그인용)
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	implementation 'com.google.code.gson:gson:2.10.1'
 
-    // JWT 토큰 처리
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
-    implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+	// JWT 토큰 처리
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
-   
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
 
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
-    testImplementation 'org.springframework.security:spring-security-test'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
-    // 이건 테스트용
-    testImplementation 'com.h2database:h2'
+	testImplementation 'org.springframework.security:spring-security-test'
+
+	// 이건 테스트용
+	testImplementation 'com.h2database:h2'
 
 	// 스웨거
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
@@ -68,5 +68,5 @@ dependencies {
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
