@@ -35,8 +35,10 @@ public enum ErrorStatus {
     //chat
     CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT404", "존재하지 않는 채팅방입니다."),
     NOT_CHAT_ROOM_MEMBER(HttpStatus.FORBIDDEN, "CHAT403", "해당 방의 참여자가 아닙니다."),
-    NOT_ALLOWED_SELF_CHAT(HttpStatus.BAD_REQUEST, "CHAT400", "자기 자신과는 채팅방을 생성할 수 없습니다.");
+    NOT_ALLOWED_SELF_CHAT(HttpStatus.BAD_REQUEST, "CHAT400", "자기 자신과는 채팅방을 생성할 수 없습니다."),
 
+    //image
+    IMAGE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "image400", "이미지 업로드 실패");
     private final HttpStatus status;
     private final String code;
     private final String message;
