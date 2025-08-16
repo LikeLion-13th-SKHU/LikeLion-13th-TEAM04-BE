@@ -4,6 +4,7 @@ import com.likelion.cheongsanghoe.exception.CustomException;
 import com.likelion.cheongsanghoe.exception.Response;
 import com.likelion.cheongsanghoe.exception.status.ErrorStatus;
 import com.likelion.cheongsanghoe.exception.status.SuccessStatus;
+import com.likelion.cheongsanghoe.mainpage.api.dto.response.MainCategoryResponseDto;
 import com.likelion.cheongsanghoe.post.api.dto.request.PostUpdateRequestDto;
 import com.likelion.cheongsanghoe.post.api.dto.response.*;
 import com.likelion.cheongsanghoe.post.domain.Category;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -124,6 +126,16 @@ public class PostService {
                         })
                 .sorted((c1, c2) -> Long.compare(c2.count(), c1.count()))
                 .toList();
+    }
+    //메인페이 인기 카테고리 메서드
+    public List<MainCategoryResponseDto> getMainCategory(int limit){
+        List<CategoryCountDto> categoryCount = getCategoryCount();//전체 개수
+
+        return categoryCount.stream()
+                .limit(limit) //상위 limit만큼 자른다
+                .map(categoryCountDto -> MainCategoryResponseDto.from(categoryCountDto.category()))
+                .collect(Collectors.toList());
+
     }
 }
 
