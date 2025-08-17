@@ -10,6 +10,8 @@ import com.likelion.cheongsanghoe.post.api.dto.request.PostSaveRequestDto;
 import com.likelion.cheongsanghoe.post.application.SearchService;
 import com.likelion.cheongsanghoe.post.domain.Category;
 import com.likelion.cheongsanghoe.post.domain.Post;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -28,11 +30,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts")
+@Tag(name = "공고 CRUD")
 public class PostController {
     private final PostService postService;
     private final SearchService searchService;
 
     //공고 생성
+    @Operation(summary = "공고 생성")
     @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Response<Long>> postSave(@ModelAttribute @Valid PostSaveRequestDto postSaveRequestDto, @RequestHeader("userId") Long userId) {
         Response<Long> response = postService.postSave(postSaveRequestDto, userId);
@@ -42,12 +46,14 @@ public class PostController {
     }
 
     //postId로 공고 상세 조회
+    @Operation(summary = "postId로 공고 상세 조회")
     @GetMapping("/{postId}")
     public Response<PostInfoResponseDto> PostFindById(@PathVariable("postId")Long postId) {
         PostInfoResponseDto postInfoResponseDto = postService.getPostId(postId);
         return Response.success(SuccessStatus.SUCCESS,postInfoResponseDto);
     }
     //공고 전체 조회(요약 정보)
+    @Operation(summary = "공고 전체 조회(요약된 공고 정보), 키워드랑 카테고리 쿼리 파라미터로 받는다(검색기능)")
     @GetMapping
     public Response<PostPageResponseDto> postFindAll(
             @RequestParam(required = false) String keyword,
@@ -75,6 +81,7 @@ public class PostController {
         return Response.success(SuccessStatus.SUCCESS,postPageResponseDto);
     }
     //postId로 공고 수정
+    @Operation(summary = "postId로 공고 수정")
     @PatchMapping("/{postId}")
     public Response<PostInfoResponseDto> postUpdate(@PathVariable("postId")Long postId, @RequestBody PostUpdateRequestDto postUpdateRequestDto) {
         postService.postUpdate(postId, postUpdateRequestDto);
@@ -82,6 +89,7 @@ public class PostController {
         return Response.success(SuccessStatus.SUCCESS,postInfoResponseDto);
     }
     //공고 삭제
+    @Operation(summary = "공고 삭제")
     @DeleteMapping("/{postId}")
     public Response<String> postDelete(@PathVariable("postId")Long postId) {
         postService.postDelete(postId);
