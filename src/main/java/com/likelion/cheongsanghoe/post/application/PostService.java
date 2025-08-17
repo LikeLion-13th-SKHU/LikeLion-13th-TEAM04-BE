@@ -13,7 +13,9 @@ import com.likelion.cheongsanghoe.post.domain.repository.PostRepository;
 import com.likelion.cheongsanghoe.post.api.dto.request.PostSaveRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,7 +129,7 @@ public class PostService {
                 .sorted((c1, c2) -> Long.compare(c2.count(), c1.count()))
                 .toList();
     }
-    //메인페이 인기 카테고리 메서드
+    //메인페이지 인기 카테고리 메서드
     public List<MainCategoryResponseDto> getMainCategory(int limit){
         List<CategoryCountDto> categoryCount = getCategoryCount();//전체 개수
 
@@ -135,7 +137,17 @@ public class PostService {
                 .limit(limit) //상위 limit만큼 자른다
                 .map(categoryCountDto -> MainCategoryResponseDto.from(categoryCountDto.category()))
                 .collect(Collectors.toList());
+    }
+    //메인페이지 최신 공고 메서드
+    public List<PostSummaryResponseDto> getMainPost(int limit){
+        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "creatAt"));
 
+        Page<Post> recentPost = postRepository.findAll(pageable);
+
+        //recentPost에서 데이터리스트를 뽑아 PostSummaryResponseDto로 변환
+        return recentPost.getContent().stream()
+                .map(PostSummaryResponseDto::from)
+                .collect(Collectors.toList());
     }
 }
 

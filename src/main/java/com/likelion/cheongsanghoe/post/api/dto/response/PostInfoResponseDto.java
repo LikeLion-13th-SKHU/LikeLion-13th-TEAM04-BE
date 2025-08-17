@@ -2,22 +2,45 @@ package com.likelion.cheongsanghoe.post.api.dto.response;
 
 import com.likelion.cheongsanghoe.post.domain.Category;
 import com.likelion.cheongsanghoe.post.domain.Post;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.time.LocalDate;
 
 @Builder
 public record PostInfoResponseDto(
+
+        @Schema(description = "공고 제목", example = "공고 제목")
         String title,
+
+        @Schema(description = "공고 내용", example = "내용")
         String content,
+
+        @Schema(description = "해당 위치", example = "위치")
         String location,
-        int salary,
+
+        @Schema(description = "급여", example = "11000")
+        Integer salary,
+
+        @Schema(description = "일하는 시간", example = "11:00~13:00")
         String work_time,
+
+        @Schema(description = "해당 공고에 원하는 태그", example = "책임감, 경력무관")
         String tags,
+
+        @Schema(description = "공고 마감일", example = "2025.07.25")
         String deadline,
+
+        @Schema(description = "모집 인원", example = "1")
         int num,
+
+        @Schema(description = "일하는 기간", example = "2025.07.27~2025.07.28")
         String work_period,
+
+        @Schema(description = "공고 생성일", example = "2025.07.20")
         LocalDate createAt,
+
+        @Schema(description = "카테고리", example = "카페")
         Category category
 ) {
     public static PostInfoResponseDto from(Post post){
