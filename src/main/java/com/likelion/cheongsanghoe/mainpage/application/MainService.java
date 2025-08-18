@@ -3,6 +3,7 @@ package com.likelion.cheongsanghoe.mainpage.application;
 import com.likelion.cheongsanghoe.mainpage.api.dto.response.MainCategoryResponseDto;
 import com.likelion.cheongsanghoe.post.api.dto.response.PostSummaryResponseDto;
 import com.likelion.cheongsanghoe.post.application.PostService;
+import com.likelion.cheongsanghoe.post.application.SearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class MainService {
     private final PostService postService;
+    private final SearchService searchService;
 
     //인기 카테고리
     public List<MainCategoryResponseDto> getMainCategory(int limit){
@@ -23,4 +25,7 @@ public class MainService {
     public List<PostSummaryResponseDto> getMainPost(int limit){
         return postService.getMainPost(limit);
     }
+
+
+
 }

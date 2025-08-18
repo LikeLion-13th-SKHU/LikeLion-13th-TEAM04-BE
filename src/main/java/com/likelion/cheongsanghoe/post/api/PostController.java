@@ -61,13 +61,7 @@ public class PostController {
             //PageableDefault로 페이지네이션 기본값 적용, pageable 파라미터 추가
             @PageableDefault(size = 10, sort = "createAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<PostSummaryResponseDto> postPageDto;
-        //검색 조건이 있으면 검색 서비스 호출
-        if ((keyword != null && !keyword.trim().isEmpty()) || category != null){
-            postPageDto = searchService.searchPosts(keyword, category, pageable);
-        }else{
-            postPageDto = postService.getPostPage(pageable).map(PostSummaryResponseDto::from);
-        }
+        Page<PostSummaryResponseDto> postPageDto = searchService.searchPosts(keyword, category, pageable);
 
         //PaginationDto 생성(페이지화 된 정보(postPageDto)를 가져온다)
         PaginationDto paginationDto = new PaginationDto(
