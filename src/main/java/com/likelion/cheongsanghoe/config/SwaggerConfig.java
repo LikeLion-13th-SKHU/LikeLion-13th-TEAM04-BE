@@ -11,12 +11,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
-@EnableWebMvc
 public class SwaggerConfig {
 
     private final SwaggerProperties swaggerProperties;
@@ -31,6 +30,8 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI openAPI() {
+        System.out.println(">>> swagger.url = " + swaggerProperties.url());
+
         return new OpenAPI()
                 .info(new Info()
                         .title("Cheongsanghoe API")
@@ -40,7 +41,8 @@ public class SwaggerConfig {
                                 .name("Cheongsanghoe Team")
                                 .email("wjdekdns0218@gmail.com"))
                         .license(new License()
-                                .name("Apache 2.0")));
+                                .name("Apache 2.0")))
+                .servers(List.of(server()));
     }
 
     private Server server(){
