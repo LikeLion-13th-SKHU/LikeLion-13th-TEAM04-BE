@@ -27,7 +27,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
 
-
     @Transactional
     public MemberInfoResponseDto createMemberProfileByEmail(String email, MemberUpdateRequestDto requestDto) {
         log.info("Creating member profile for user email: {}", email);
@@ -35,17 +34,14 @@ public class MemberService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // 이미 프로필이 존재하는지 확인
         if (memberRepository.findByUser(user).isPresent()) {
             throw new MemberAlreadyExistException("회원이 이미 존재합니다. email: " + email);
         }
 
-        // 닉네임 중복 체크
         if (memberRepository.existsByNickname(requestDto.getNickname())) {
             throw new DuplicateNicknameException(requestDto.getNickname());
         }
 
-        // 전화번호 중복 체크
         if (requestDto.getPhoneNumber() != null &&
                 memberRepository.existsByPhoneNumber(requestDto.getPhoneNumber())) {
             throw new DuplicatePhoneNumberException(requestDto.getPhoneNumber());
@@ -83,13 +79,11 @@ public class MemberService {
         Member member = memberRepository.findByUser(user)
                 .orElseThrow(() -> new MemberNotFoundException("회원 정보를 찾을 수 없습니다."));
 
-        // 닉네임 변경시 중복 체크
         if (!member.getNickname().equals(requestDto.getNickname()) &&
                 memberRepository.existsByNickname(requestDto.getNickname())) {
             throw new DuplicateNicknameException(requestDto.getNickname());
         }
 
-        // 전화번호 변경시 중복 체크
         if (requestDto.getPhoneNumber() != null &&
                 !requestDto.getPhoneNumber().equals(member.getPhoneNumber()) &&
                 memberRepository.existsByPhoneNumber(requestDto.getPhoneNumber())) {
@@ -115,7 +109,6 @@ public class MemberService {
         return MemberInfoResponseDto.of(member);
     }
 
-
     @Transactional
     public void withdrawMemberByEmail(String email) {
         log.info("Withdrawing member for user email: {}", email);
@@ -129,7 +122,6 @@ public class MemberService {
         log.info("Member withdrawn successfully. MemberId: {}", member.getId());
     }
 
-
     @Transactional(readOnly = true)
     public MemberInfoResponseDto getMemberInfoByEmail(String email) {
         User user = userRepository.findByEmail(email)
@@ -138,8 +130,6 @@ public class MemberService {
                 .orElseThrow(() -> new MemberNotFoundException("회원 정보를 찾을 수 없습니다."));
         return MemberInfoResponseDto.of(member);
     }
-
-
 
     public MemberInfoResponseDto getMemberById(Long memberId) {
         log.info("Getting member info by memberId: {}", memberId);
@@ -191,6 +181,21 @@ public class MemberService {
         log.info("Getting members by role: {}", role);
 
         Page<Member> members = memberRepository.findByUserRole(role, pageable);
+        return members.map(MemberInfoResponseDto::of);
+    }
+
+    // 역할 있는 전체 활성 회원 슈 (추가함)
+    @Transactional(readOnly = true)
+    public long countActiveMembersWithRole() {
+        Long count = memberRepository.countActiveMembersWithRole();
+        log.info("Counted {} active members with role", count);
+        return count != null ? count : 0;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MemberInfoResponseDto> searchMembersByKeyword(String keyword, Pageable pageable) {
+        log.info("Searching members by keyword: {}", keyword);
+        Page<Member> members = memberRepository.searchByKeyword(keyword, pageable);
         return members.map(MemberInfoResponseDto::of);
     }
 }

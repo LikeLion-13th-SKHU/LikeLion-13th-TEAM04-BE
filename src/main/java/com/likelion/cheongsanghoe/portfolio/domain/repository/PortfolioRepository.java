@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
     Page<Portfolio> findByMember(Member member, Pageable pageable);
 
-
     Page<Portfolio> findByTitleContaining(String title, Pageable pageable);
 
     Page<Portfolio> findByTitleContainingOrContentContaining(String title, String content, Pageable pageable);
+
 }
