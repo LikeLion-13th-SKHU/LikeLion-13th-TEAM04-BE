@@ -5,6 +5,7 @@ import com.likelion.cheongsanghoe.exception.Response;
 import com.likelion.cheongsanghoe.exception.status.SuccessStatus;
 import com.likelion.cheongsanghoe.mainpage.api.dto.response.MainCategoryResponseDto;
 import com.likelion.cheongsanghoe.mainpage.application.MainService;
+import com.likelion.cheongsanghoe.post.api.dto.response.PostPageResponseDto;
 import com.likelion.cheongsanghoe.post.api.dto.response.PostSummaryResponseDto;
 import com.likelion.cheongsanghoe.post.application.PostService;
 import lombok.RequiredArgsConstructor;
@@ -34,4 +35,5 @@ public class MainController {
         List<PostSummaryResponseDto> mainPostResponseDto = mainService.getMainPost(limit);
         return Response.success(SuccessStatus.SUCCESS, mainPostResponseDto);
     }
+
 }
