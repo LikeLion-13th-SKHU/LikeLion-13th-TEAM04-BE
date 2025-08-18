@@ -5,6 +5,7 @@ import com.likelion.cheongsanghoe.auth.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -16,7 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 
@@ -28,7 +28,6 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // Swagger / OpenAPI 화이트리스트
     private static final String[] SWAGGER_WHITELIST = {
             "/swagger-ui.html",
             "/swagger-ui/**",
@@ -58,13 +57,10 @@ public class SecurityConfig {
                                 "/favicon.ico"
                         ).permitAll()
 
+                        .requestMatchers(HttpMethod.GET, "/api/portfolios/**").permitAll()
 
                         .requestMatchers("/api/members/**").authenticated()
-
-
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(AbstractHttpConfigurer::disable)
@@ -84,8 +80,6 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
