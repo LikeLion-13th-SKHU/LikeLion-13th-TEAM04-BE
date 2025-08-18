@@ -44,3 +44,7 @@ logging:
 
 swagger:
   url: https://cheongsanghoe.store
+
+ai:
+  base-url: ${AI_BASE_URL:http://localhost:8000}
+  secret: ${AI_SHARED_SECRET:super-secret}
