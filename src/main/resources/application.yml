@@ -41,3 +41,6 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace
+
+swagger:
+  url: ${SERVER_URL:http://localhost:8080}
