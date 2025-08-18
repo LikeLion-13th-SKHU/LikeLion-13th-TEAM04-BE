@@ -67,6 +67,23 @@ public class PortfolioService {
         return portfolios.map(PortfolioResponseDto::from);
     }
 
+    @Transactional(readOnly = true)
+    public Page<PortfolioResponseDto> searchPortfolios(String keyword, Pageable pageable) {
+        log.info("Searching portfolios with keyword: {}", keyword);
+
+        Page<Portfolio> portfolios;
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            // 키워드가 없으면 전체 조회
+            portfolios = portfolioRepository.findAll(pageable);
+        } else {
+            // 키워드가 있으면 제목 또는 내용에서 검색
+            portfolios = portfolioRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
+        }
+
+        return portfolios.map(PortfolioResponseDto::from);
+    }
+
     public PortfolioResponseDto updatePortfolio(Long portfolioId, String email, PortfolioUpdateRequestDto requestDto) {
         log.info("Updating portfolio: {} by user: {}", portfolioId, email);
 

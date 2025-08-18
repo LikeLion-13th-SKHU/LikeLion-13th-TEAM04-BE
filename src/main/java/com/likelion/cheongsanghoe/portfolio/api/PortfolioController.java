@@ -54,6 +54,16 @@ public class PortfolioController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<PortfolioResponseDto>> searchPortfolios(
+            @RequestParam(required = false) String keyword,
+            Pageable pageable) {
+        log.info("Searching portfolios with keyword: {}", keyword);
+
+        Page<PortfolioResponseDto> response = portfolioService.searchPortfolios(keyword, pageable);
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/{portfolioId}")
     public ResponseEntity<PortfolioResponseDto> updatePortfolio(
             @PathVariable Long portfolioId,
