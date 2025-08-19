@@ -11,6 +11,7 @@ import com.likelion.cheongsanghoe.member.domain.repository.MemberRepository;
 import com.likelion.cheongsanghoe.member.domain.Member;
 import com.likelion.cheongsanghoe.member.domain.MemberStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -143,8 +145,21 @@ public class AuthService {
                 googleClientId, googleClientSecret, code, googleRedirectUri
         );
 
+        // 로그 추가
+        log.info("=== Google OAuth2 Token Request ===");
+        log.info("client_id      = {}", googleClientId);
+        log.info("client_secret  = {}", googleClientSecret.substring(0, 5) + "*****"); // 시크릿은 앞 일부만
+        log.info("code           = {}", code);
+        log.info("redirect_uri   = {}", googleRedirectUri);
+        log.info("tokenUrl       = {}", tokenUrl);
+
         HttpEntity<String> request = new HttpEntity<>(body, headers);
         ResponseEntity<Map> response = restTemplate.exchange(tokenUrl, HttpMethod.POST, request, Map.class);
+
+        // 로그 추가
+        log.info("=== Google OAuth2 Token Response ===");
+        log.info("status         = {}", response.getStatusCode());
+        log.info("body           = {}", response.getBody());
 
         return (String) response.getBody().get("access_token");
     }
