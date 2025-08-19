@@ -19,7 +19,12 @@ public enum SuccessStatus {
     MEMBER_INFO_SUCCESS(HttpStatus.OK, "MEMBER200", "회원 정보를 성공적으로 조회했습니다."),
     MEMBER_UPDATED(HttpStatus.OK, "MEMBER200", "회원 정보가 성공적으로 수정되었습니다."),
     MEMBER_ACTIVATED(HttpStatus.OK, "MEMBER200", "회원이 성공적으로 활성화되었습니다."),
-    MEMBER_SUSPENDED(HttpStatus.OK, "MEMBER200", "회원이 성공적으로 정지되었습니다.");
+    MEMBER_SUSPENDED(HttpStatus.OK, "MEMBER200", "회원이 성공적으로 정지되었습니다."),
+
+    POST_CREATED(HttpStatus.CREATED, "POST201", "공고가 성공적으로 생성되었습니다."),
+    POST_SUCCESS(HttpStatus.OK, "POST200", "공고를 성공적으로 조회했습니다."),
+    POST_UPDATED(HttpStatus.OK, "POST200", "공고가 성공적으로 수정되었습니다."),
+    POST_DELETE(HttpStatus.OK, "POST200", "공고가 성공적으로 삭제되었습니다.");
 
     private final HttpStatus status;
     private final String code;
