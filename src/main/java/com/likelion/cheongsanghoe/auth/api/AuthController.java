@@ -17,7 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,10 +39,22 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "잘못된 인증 코드"),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
-    public LoginResponseDto googleCallback(
+    public void googleCallback(
             @Parameter(description = "Google OAuth2 인증 코드", required = true)
-            @RequestParam(name = "code") String code) {
-        return authService.googleLogin(code);
+            @RequestParam(name = "code") String code,
+            HttpServletResponse response) throws IOException {
+        try {
+            // 1. 백엔드에서 code -> JWT 발급
+            LoginResponseDto login = authService.googleLogin(code);
+
+            // 2. 프엔 리다이렉트 url
+            String redirectUrl = "http://localhost:3000/oauth2/callback/google?token=" + login.getAccessToken();
+
+            // 3. 프엔으로 리다이렉트
+            response.sendRedirect(redirectUrl);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Google OAuth2 로그인 실패: " + e.getMessage());
+        }
     }
 
     @PostMapping("/role")
