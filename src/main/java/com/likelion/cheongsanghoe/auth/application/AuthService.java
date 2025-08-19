@@ -1,5 +1,6 @@
 package com.likelion.cheongsanghoe.auth.application;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.likelion.cheongsanghoe.auth.api.dto.request.RoleSelectionRequestDto;
 import com.likelion.cheongsanghoe.auth.api.dto.response.AuthResponseDto;
 import com.likelion.cheongsanghoe.auth.api.dto.response.LoginResponseDto;
@@ -16,14 +17,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
@@ -45,34 +44,24 @@ public class AuthService {
     @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
     private String googleRedirectUri;
 
-    // 코드 추가
-    private final Set<String> usedAuthCodes = ConcurrentHashMap.newKeySet();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public LoginResponseDto googleLogin(String code) {
-
-        // 코드 추가 1) 같은 code가 이미 처리되었거나 동시에 들어오면 즉시 400
-        if (code == null || code.isBlank() || !usedAuthCodes.add(code)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Authorization code already used or invalid. Re-login required.");
-        }
-
         try {
-            String accessToken = getGoogleAccessToken(code); // 구글 교환
+            // 1. code로 id_token 받아오기
+            String idToken = getGoogleIdToken(code); // 구글 교환
 
-            // 성공 시 그대로 시존 로직
-            // 구글 사용자 정보 조회
-            Map<String, Object> userInfo = getGoogleUserInfo(accessToken);
-
-            String email = (String) userInfo.get("email");
-            String name = (String) userInfo.get("name");
-            String profileImage = (String) userInfo.get("picture");
+            // 2. id_token 파싱
+            Map<String, Object> claims = parseIdToken(idToken);
+            String email = (String) claims.get("email");
+            String name = (String) claims.getOrDefault("name", "User");
+            String picture = (String) claims.get("picture");
 
             // 기존 사용자 확인 또는 새 사용자 생성
             Optional<User> existingUser = userRepository.findByEmail(email);
 
             if (existingUser.isPresent()) {
                 User user = existingUser.get();
-
                 // Member 정보 조회
                 Optional<Member> memberOpt = memberRepository.findByUser(user);
 
@@ -93,13 +82,12 @@ public class AuthService {
                         .build();
 
                 User savedUser = userRepository.save(newUser);
-
                 // 새 Member 생성-그 구글에서 받은 기본 정보로 생성
                 Member newMember = Member.builder()
                         .user(savedUser)
                         .nickname(name)
                         .status(MemberStatus.ACTIVE)
-                        .profileImageUrl(profileImage)
+                        .profileImageUrl(picture)
                         .build();
 
                 Member savedMember = memberRepository.save(newMember);
@@ -114,17 +102,49 @@ public class AuthService {
                         .build();
             }
             // 코드 추가
-        } catch (HttpClientErrorException.BadRequest e) {
-            //  2) 구글 400(invalid_grant 등)은 500로 올리지 말고 그대로 400로 응답
-            log.warn("Google token exchange failed: {}", e.getResponseBodyAsString());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "OAuth token exchange failed: " + e.getStatusText());
-        } catch (RuntimeException e) {
-            //  3) 내부 오류면 재시도 허용을 위해 code 예약 해제
-            usedAuthCodes.remove(code);
-            throw e;
+        } catch (Exception e) {
+            log.error("OAuth login failed", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OAuth login failed: " + e.getMessage());
         }
     }
+
+//    // 구글 토큰 엔드포인트에서 id_token 가져오기
+    private String getGoogleIdToken(String code) {
+        String tokenUrl = "https://oauth2.googleapis.com/token";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        String body = String.format(
+                "client_id=%s&client_secret=%s&code=%s&grant_type=authorization_code&redirect_uri=%s",
+                googleClientId, googleClientSecret, code, googleRedirectUri
+        );
+
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
+        ResponseEntity<Map> response = restTemplate.exchange(tokenUrl, HttpMethod.POST, request, Map.class);
+
+        Map<String, Object> responseBody = response.getBody();
+        if (responseBody == null || responseBody.get("id_token") == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No id_token in response");
+        }
+
+        return (String) responseBody.get("id_token");
+    }
+
+    // id_token의 payload 파싱
+    private Map<String, Object> parseIdToken(String idToken) {
+        try{
+            String[] parts = idToken.split("\\.");
+            if (parts.length < 2) throw new IllegalArgumentException("Invalid id_token");
+
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+
+            return objectMapper.readValue(payload, Map.class);
+        } catch(Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to parse id_token");
+        }
+    }
+
 
     public AuthResponseDto selectRole(String token, RoleSelectionRequestDto requestDto) {
         String email = jwtTokenProvider.getEmailFromToken(token);
