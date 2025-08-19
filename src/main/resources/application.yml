@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: prod
+    active: dev
 
   datasource:
     url: ${spring.datasource.url}
@@ -15,7 +15,7 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: https://cheongsanghoe.store/login/oauth2/code/google
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             scope:
               - email
               - profile
