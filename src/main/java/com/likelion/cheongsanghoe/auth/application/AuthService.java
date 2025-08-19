@@ -33,13 +33,13 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RestTemplate restTemplate;
 
-    @Value("55848478880-rnds6ucgu8aov43ua89hd599i6gv3k5h.apps.googleusercontent.com")
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String googleClientId;
 
-    @Value("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")
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String googleClientSecret;
 
-    @Value("http://localhost:8080/login/oauth2/code/google")
+    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
     private String googleRedirectUri;
 
 
