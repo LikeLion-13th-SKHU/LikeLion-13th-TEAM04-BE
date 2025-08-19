@@ -13,16 +13,17 @@ import com.likelion.cheongsanghoe.member.domain.MemberStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
@@ -44,63 +45,84 @@ public class AuthService {
     @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
     private String googleRedirectUri;
 
+    // 코드 추가
+    private final Set<String> usedAuthCodes = ConcurrentHashMap.newKeySet();
 
     public LoginResponseDto googleLogin(String code) {
 
-        String accessToken = getGoogleAccessToken(code);
+        // 코드 추가 1) 같은 code가 이미 처리되었거나 동시에 들어오면 즉시 400
+        if (code == null || code.isBlank() || !usedAuthCodes.add(code)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Authorization code already used or invalid. Re-login required.");
+        }
 
-        // 구글 사용자 정보 조회
-        Map<String, Object> userInfo = getGoogleUserInfo(accessToken);
+        try {
+            String accessToken = getGoogleAccessToken(code); // 구글 교환
 
-        String email = (String) userInfo.get("email");
-        String name = (String) userInfo.get("name");
-        String profileImage = (String) userInfo.get("picture");
+            // 성공 시 그대로 시존 로직
+            // 구글 사용자 정보 조회
+            Map<String, Object> userInfo = getGoogleUserInfo(accessToken);
 
-        // 기존 사용자 확인 또는 새 사용자 생성
-        Optional<User> existingUser = userRepository.findByEmail(email);
+            String email = (String) userInfo.get("email");
+            String name = (String) userInfo.get("name");
+            String profileImage = (String) userInfo.get("picture");
 
-        if (existingUser.isPresent()) {
-            User user = existingUser.get();
+            // 기존 사용자 확인 또는 새 사용자 생성
+            Optional<User> existingUser = userRepository.findByEmail(email);
 
-            // Member 정보 조회
-            Optional<Member> memberOpt = memberRepository.findByUser(user);
+            if (existingUser.isPresent()) {
+                User user = existingUser.get();
 
-            String token = jwtTokenProvider.createToken(user.getEmail(),
-                    user.getRole() != null ? user.getRole().name() : null);
+                // Member 정보 조회
+                Optional<Member> memberOpt = memberRepository.findByUser(user);
 
-            return LoginResponseDto.builder()
-                    .accessToken(token)
-                    .isNewUser(false)
-                    .hasRole(user.getRole() != null)
-                    .user(AuthResponseDto.from(user, memberOpt.orElse(null)))
-                    .build();
-        } else {
-            // 새 User 생성
-            User newUser = User.builder()
-                    .email(email)
-                    .name(name)
-                    .build();
+                String token = jwtTokenProvider.createToken(user.getEmail(),
+                        user.getRole() != null ? user.getRole().name() : null);
 
-            User savedUser = userRepository.save(newUser);
+                return LoginResponseDto.builder()
+                        .accessToken(token)
+                        .isNewUser(false)
+                        .hasRole(user.getRole() != null)
+                        .user(AuthResponseDto.from(user, memberOpt.orElse(null)))
+                        .build();
+            } else {
+                // 새 User 생성
+                User newUser = User.builder()
+                        .email(email)
+                        .name(name)
+                        .build();
 
-            // 새 Member 생성-그 구글에서 받은 기본 정보로 생성
-            Member newMember = Member.builder()
-                    .user(savedUser)
-                    .nickname(name)
-                    .status(MemberStatus.ACTIVE)
-                    .profileImageUrl(profileImage)
-                    .build();
+                User savedUser = userRepository.save(newUser);
 
-            Member savedMember = memberRepository.save(newMember);
+                // 새 Member 생성-그 구글에서 받은 기본 정보로 생성
+                Member newMember = Member.builder()
+                        .user(savedUser)
+                        .nickname(name)
+                        .status(MemberStatus.ACTIVE)
+                        .profileImageUrl(profileImage)
+                        .build();
 
-            String token = jwtTokenProvider.createToken(savedUser.getEmail(), null);
+                Member savedMember = memberRepository.save(newMember);
 
-            return LoginResponseDto.builder()
-                    .accessToken(token)
-                    .isNewUser(true)
-                    .hasRole(false)
-                    .user(AuthResponseDto.from(savedUser, savedMember))
-                    .build();
+                String token = jwtTokenProvider.createToken(savedUser.getEmail(), null);
+
+                return LoginResponseDto.builder()
+                        .accessToken(token)
+                        .isNewUser(true)
+                        .hasRole(false)
+                        .user(AuthResponseDto.from(savedUser, savedMember))
+                        .build();
+            }
+            // 코드 추가
+        } catch (HttpClientErrorException.BadRequest e) {
+            //  2) 구글 400(invalid_grant 등)은 500로 올리지 말고 그대로 400로 응답
+            log.warn("Google token exchange failed: {}", e.getResponseBodyAsString());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "OAuth token exchange failed: " + e.getStatusText());
+        } catch (RuntimeException e) {
+            //  3) 내부 오류면 재시도 허용을 위해 code 예약 해제
+            usedAuthCodes.remove(code);
+            throw e;
         }
     }
 
