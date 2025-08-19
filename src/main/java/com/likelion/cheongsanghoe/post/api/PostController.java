@@ -41,7 +41,7 @@ public class PostController {
     public ResponseEntity<Response<Long>> postSave(@ModelAttribute @Valid PostSaveRequestDto postSaveRequestDto, @RequestHeader("userId") Long userId) {
         Response<Long> response = postService.postSave(postSaveRequestDto, userId);
         return ResponseEntity
-                .status(SuccessStatus.CREATED.getStatus())
+                .status(SuccessStatus.POST_CREATED.getStatus())
                 .body(response);
     }
 
@@ -50,7 +50,7 @@ public class PostController {
     @GetMapping("/{postId}")
     public Response<PostInfoResponseDto> PostFindById(@PathVariable("postId")Long postId) {
         PostInfoResponseDto postInfoResponseDto = postService.getPostId(postId);
-        return Response.success(SuccessStatus.SUCCESS,postInfoResponseDto);
+        return Response.success(SuccessStatus.POST_SUCCESS,postInfoResponseDto);
     }
     //공고 전체 조회(요약 정보)
     @Operation(summary = "공고 전체 조회(요약된 공고 정보), 키워드랑 카테고리 쿼리 파라미터로 받는다(검색기능)")
@@ -72,7 +72,7 @@ public class PostController {
         );
         //게시글 리스트와 페이지네이션 정보를 합친다
         PostPageResponseDto postPageResponseDto = new PostPageResponseDto(postPageDto.getContent(), paginationDto);
-        return Response.success(SuccessStatus.SUCCESS,postPageResponseDto);
+        return Response.success(SuccessStatus.POST_SUCCESS,postPageResponseDto);
     }
     //postId로 공고 수정
     @Operation(summary = "postId로 공고 수정")
@@ -80,14 +80,14 @@ public class PostController {
     public Response<PostInfoResponseDto> postUpdate(@PathVariable("postId")Long postId, @RequestBody PostUpdateRequestDto postUpdateRequestDto) {
         postService.postUpdate(postId, postUpdateRequestDto);
         PostInfoResponseDto postInfoResponseDto = postService.getPostId(postId);
-        return Response.success(SuccessStatus.SUCCESS,postInfoResponseDto);
+        return Response.success(SuccessStatus.POST_UPDATED,postInfoResponseDto);
     }
     //공고 삭제
     @Operation(summary = "공고 삭제")
     @DeleteMapping("/{postId}")
     public Response<String> postDelete(@PathVariable("postId")Long postId) {
         postService.postDelete(postId);
-        return Response.success(SuccessStatus.SUCCESS,null);
+        return Response.success(SuccessStatus.POST_DELETE,null);
     }
 
 }
