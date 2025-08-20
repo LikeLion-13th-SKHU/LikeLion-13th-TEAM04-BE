@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -33,25 +34,24 @@ public class AuthController {
 
     @GetMapping("/code/google")
     @Operation(summary = "Google OAuth2 콜백", description = "Google OAuth2 인증 후 콜백을 처리하여 로그인을 완료합니다")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그인 성공",
-                    content = @Content(schema = @Schema(implementation = LoginResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 인증 코드"),
-            @ApiResponse(responseCode = "500", description = "서버 오류")
-    })
-    public ResponseEntity<LoginResponseDto> googleCallback(
-            @Parameter(description = "Google OAuth2 인증 코드", required = true)
-            @RequestParam(name = "code") String code,
+    public void googleCallback(
+            @RequestParam("code") String code,
+            @RequestParam(value = "state", required = false) String state,
             HttpServletResponse response) throws IOException {
-        try {
-            // 1. 백엔드에서 code -> JWT 발급
-            LoginResponseDto login = authService.googleLogin(code);
+        LoginResponseDto dto = authService.googleLogin(code);
 
-            return ResponseEntity.ok(login);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Google OAuth2 로그인 실패: " + e.getMessage());
+        Cookie access = new Cookie("access", dto.getAccessToken()); // 쿠키 생성
+        access.setHttpOnly(true);
+        access.setSecure(true); // https 요청에만 전송
+        access.setPath("/");
+        access.setMaxAge(60 * 60); // 1시간 수명
+        access.setAttribute("SameSite", "None");
+        response.addCookie(access); // 클라이언트에게 쿠키를 내림
+
+        String feUrl = "http://localhost:3000/oauth2/callback/google";
+        if(state != null) feUrl += "?state=" + state;
+        response.sendRedirect(feUrl);
         }
-    }
 
     @PostMapping("/role")
     @Operation(summary = "사용자 역할 선택", description = "로그인한 사용자의 역할(구직자/구인자)을 선택합니다")
