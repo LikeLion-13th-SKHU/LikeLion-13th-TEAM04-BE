@@ -6,6 +6,7 @@ import com.likelion.cheongsanghoe.auth.domain.repository.UserRepository;
 import com.likelion.cheongsanghoe.auth.security.oauth2.UserPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +59,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
+        }
+
+        // 쿠키 access
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null){
+            for (Cookie cookie : cookies) {
+                if("access".equals(cookie.getName()) && StringUtils.hasText(cookie.getValue())){
+                    return cookie.getValue();
+                }
+            }
         }
         return null;
     }
