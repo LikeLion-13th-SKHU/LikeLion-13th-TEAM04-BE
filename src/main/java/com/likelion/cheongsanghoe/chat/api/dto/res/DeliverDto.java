@@ -1,5 +1,6 @@
 package com.likelion.cheongsanghoe.chat.api.dto.res;
 
+import com.likelion.cheongsanghoe.chat.domain.ChatMessage;
 import com.likelion.cheongsanghoe.chat.domain.MessageType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -25,4 +26,15 @@ public record DeliverDto (
         @Schema(description = "생성 시각", example = "2025-08-12T17:42:10")
         LocalDateTime createdAt
 ){
+
+        public static DeliverDto from(ChatMessage message) {
+                return new DeliverDto(
+                        message.getId(),
+                        message.getRoomId(),
+                        message.getSenderId(),
+                        message.getType(),
+                        message.getContent(),
+                        message.getCreatedAt()
+                );
+        }
 }

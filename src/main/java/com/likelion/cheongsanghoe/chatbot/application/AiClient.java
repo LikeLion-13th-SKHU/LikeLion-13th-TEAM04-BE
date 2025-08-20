@@ -55,7 +55,7 @@ public class AiClient {
 
         try{
             var res = client.post()
-                    .uri(baseUrl + "/chatbot/ask")
+                    .uri("/chat")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-AI-SIGN", hmac(secret, json))
                     .body(json)

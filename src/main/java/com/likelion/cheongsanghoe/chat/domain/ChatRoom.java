@@ -26,6 +26,9 @@ public class ChatRoom {
     @Column(name = "participant_id", nullable = false)
     private Long participantId;
 
+    @Column(name = "bot_user_id")
+    private Long botUserId;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -39,5 +42,14 @@ public class ChatRoom {
         this.creatorId = creatorId;
         this.participantId = participantId;
         this.postId = postId;
+        this.botUserId = botUserId;
+    }
+
+    public Long getBotUserId() {
+        return botUserId;
+    }
+
+    public boolean isBotRoom(){
+        return this.botUserId != null;
     }
 }
