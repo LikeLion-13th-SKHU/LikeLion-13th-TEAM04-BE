@@ -1,6 +1,8 @@
 package com.likelion.cheongsanghoe.config;
 
 import com.likelion.cheongsanghoe.global.properties.SwaggerProperties;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -16,6 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     private final SwaggerProperties swaggerProperties;
