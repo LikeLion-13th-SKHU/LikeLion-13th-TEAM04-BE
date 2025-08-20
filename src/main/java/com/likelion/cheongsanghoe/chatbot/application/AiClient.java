@@ -89,15 +89,5 @@ public class AiClient {
             throw new CustomException(ErrorStatus.INTERNAL_SERVER_ERROR, "직렬화 실패");
         }
     }
-        private String hmac(String key, String data){
-            try{
-                Mac mac = Mac.getInstance("HmacSHA256");
-                mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
-                byte[] sig = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-                return Base64.getEncoder().encodeToString(sig);
-            } catch (Exception e) {
-                throw new CustomException(ErrorStatus.INTERNAL_SERVER_ERROR, "HMAC 생성 실패");
-            }
-    }
 }
 
