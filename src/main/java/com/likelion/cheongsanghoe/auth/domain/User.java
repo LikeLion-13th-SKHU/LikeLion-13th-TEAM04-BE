@@ -46,6 +46,12 @@ public class User {
         this.role = role;
     }
 
+    // 챗봇 전용
+    public static User createBot(String email, String name){
+        User user = new User(email, name, null, null);
+        return user;
+    }
+
     public void updateRole(Role role) {
         this.role = role;
     }

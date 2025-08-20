@@ -71,8 +71,6 @@ public class Member {
     @Column(nullable = false)
     private MemberStatus status;
 
-
-
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -81,13 +79,17 @@ public class Member {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    // 챗봇
+    @Enumerated(EnumType.STRING)
+    private BotType botType;
 
     @Builder
     public Member(User user, String nickname, String phoneNumber, String address,
                   String detailAddress, String zipCode, String bio, String profileImageUrl,
                   String jobCategory, String preferredLocation, String skills,
                   Integer experienceYears, String education, Integer salaryExpectation,
-                  MemberStatus status) { // status 추가
+                  MemberStatus status,
+                  BotType botType) { // status 추가
         this.user = user;
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
@@ -103,6 +105,7 @@ public class Member {
         this.education = education;
         this.salaryExpectation = salaryExpectation;
         this.status = status; // status 필드 초기화
+        this.botType = botType;
     }
 
 

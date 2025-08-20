@@ -20,6 +20,7 @@ public class ChatWebSockerController {
     private final ChatMessageService chatMessageService;
     private final ChatRoomService chatRoomService;
     private final SimpMessagingTemplate messagingTemplate;
+//    private final AiChatService aiChatService;
 
     // /app/chat.send로 들어온 메시지 처리
     // STOMP 클라이언트가 이 경로로 send 요청 보낼 때 호출
@@ -49,5 +50,9 @@ public class ChatWebSockerController {
                         saved.getContent(),
                         saved.getCreatedAt()
                 ));
+
+        // 챗봇 채팅방이면 AI 호출 트리거
+//        aiChatService.handleIfBotRoomAsync(room, saved);
     }
 }
+
