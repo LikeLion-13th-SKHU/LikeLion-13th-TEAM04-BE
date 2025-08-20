@@ -34,6 +34,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final RestTemplate restTemplate;
+    private final TempAuthCodeStore tempAuthCodeStore; // 1회용 코드 저장소
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String googleClientId;
@@ -45,6 +46,23 @@ public class AuthService {
     private String googleRedirectUri;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    // 콜백에서 사용할 로그인 + 1회용 코드 발급
+    @Transactional
+    public String loginAndIssueAuthCode(String oauthCode){
+        LoginResponseDto dto = googleLogin(oauthCode);
+        return tempAuthCodeStore.save(dto); // 1회용 코드 발급
+    }
+
+    // 프론트 교환용 1회용 코드
+    @Transactional(readOnly = true)
+    public LoginResponseDto exchangeAuthCode(String authCode){
+        LoginResponseDto dto = tempAuthCodeStore.consume(authCode);
+        if(dto == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid or expired code");
+        }
+        return dto;
+    }
 
     public LoginResponseDto googleLogin(String code) {
         try {
