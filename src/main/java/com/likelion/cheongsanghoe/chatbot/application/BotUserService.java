@@ -35,7 +35,7 @@ public class BotUserService {
                     .orElseGet(() -> memberRepository.save(
                             Member.builder()
                                     .user(botUser)
-                                    .nickname("Seoulmate Bot")
+                                    .nickname("Cheongsanghoe Bot")
                                     .status(MemberStatus.ACTIVE)
                                     .botType(BotType.BOT)
                                     .build()

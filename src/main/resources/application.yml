@@ -43,7 +43,7 @@ logging:
     org.hibernate.type.descriptor.sql: trace
 
 swagger:
-  url: https://cheongsanghoe.store
+  url: ${SWAGGER_URL}
 
 ai:
   base-url: ${AI_BASE_URL}
