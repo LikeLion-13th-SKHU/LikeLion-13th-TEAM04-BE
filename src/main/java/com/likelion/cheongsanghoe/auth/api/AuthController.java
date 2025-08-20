@@ -34,23 +34,11 @@ public class AuthController {
 
     @GetMapping("/code/google")
     @Operation(summary = "Google OAuth2 콜백", description = "Google OAuth2 인증 후 콜백을 처리하여 로그인을 완료합니다")
-    public void googleCallback(
+    public ResponseEntity<LoginResponseDto> googleCallback(
             @RequestParam("code") String code,
-            @RequestParam(value = "state", required = false) String state,
             HttpServletResponse response) throws IOException {
         LoginResponseDto dto = authService.googleLogin(code);
-
-        String redirectUrl = "http://localhost:3000/oauth2/callback/google";
-        StringBuilder feUrl = new StringBuilder(redirectUrl);
-        if(state != null) {
-            feUrl.append("?state=").append(java.net.URLEncoder.encode(state, java.nio.charset.StandardCharsets.UTF_8));
-        }
-
-        feUrl.append("#token=").append(java.net.URLEncoder.encode(dto.getAccessToken(), java.nio.charset.StandardCharsets.UTF_8))
-                .append("&isNewUser=").append(dto.isNewUser())
-                .append("&hasRole=").append(dto.isHasRole());
-
-        response.sendRedirect(feUrl.toString());
+        return new ResponseEntity<>(dto, HttpStatus.OK);
         }
 
     @PostMapping("/role")
