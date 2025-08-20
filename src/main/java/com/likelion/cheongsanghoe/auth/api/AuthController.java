@@ -65,7 +65,7 @@ public class AuthController {
             @Parameter(description = "역할 선택 요청 정보", required = true)
             @RequestBody RoleSelectionRequestDto requestDto,
             HttpServletRequest request) {
-        String token = extractTokenFromHeader(request);
+        String token = extractToken(request);
         AuthResponseDto response = authService.selectRole(token, requestDto);
         return ResponseEntity.ok(response);
     }
@@ -77,7 +77,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
     })
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-        String token = extractTokenFromHeader(request);
+        String token = extractToken(request);
         authService.logout(token);
         return ResponseEntity.ok().build();
     }
@@ -91,15 +91,24 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
     public ResponseEntity<AuthResponseDto> getCurrentUser(HttpServletRequest request) {
-        String token = extractTokenFromHeader(request);
+        String token = extractToken(request);
         AuthResponseDto response = authService.getCurrentUser(token);
         return ResponseEntity.ok(response);
     }
 
-    private String extractTokenFromHeader(HttpServletRequest request) {
+    private String extractToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
+        }
+
+        // 쿠기 access
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie c : request.getCookies()) {
+                if ("access".equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
+                    return c.getValue();
+                }
+            }
         }
         return null;
     }
