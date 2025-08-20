@@ -44,3 +44,6 @@ logging:
 
 swagger:
   url: https://cheongsanghoe.store
+
+ai:
+  base-url: ${AI_BASE_URL}
