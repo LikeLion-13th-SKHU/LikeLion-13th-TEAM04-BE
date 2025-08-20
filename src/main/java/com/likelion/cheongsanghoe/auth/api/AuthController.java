@@ -40,17 +40,17 @@ public class AuthController {
             HttpServletResponse response) throws IOException {
         LoginResponseDto dto = authService.googleLogin(code);
 
-        Cookie access = new Cookie("access", dto.getAccessToken()); // 쿠키 생성
-        access.setHttpOnly(true);
-        access.setSecure(true); // https 요청에만 전송
-        access.setPath("/");
-        access.setMaxAge(60 * 60); // 1시간 수명
-        access.setAttribute("SameSite", "None");
-        response.addCookie(access); // 클라이언트에게 쿠키를 내림
+        String redirectUrl = "http://localhost:3000/oauth2/callback/google";
+        StringBuilder feUrl = new StringBuilder(redirectUrl);
+        if(state != null) {
+            feUrl.append("?state=").append(java.net.URLEncoder.encode(state, java.nio.charset.StandardCharsets.UTF_8));
+        }
 
-        String feUrl = "http://localhost:3000/oauth2/callback/google";
-        if(state != null) feUrl += "?state=" + state;
-        response.sendRedirect(feUrl);
+        feUrl.append("#token=").append(java.net.URLEncoder.encode(dto.getAccessToken(), java.nio.charset.StandardCharsets.UTF_8))
+                .append("&isNewUser=").append(dto.isNewUser())
+                .append("&hasRole=").append(dto.isHasRole());
+
+        response.sendRedirect(feUrl.toString());
         }
 
     @PostMapping("/role")

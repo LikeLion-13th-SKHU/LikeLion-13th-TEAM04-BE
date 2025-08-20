@@ -47,23 +47,6 @@ public class AuthService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // 콜백에서 사용할 로그인 + 1회용 코드 발급
-    @Transactional
-    public String loginAndIssueAuthCode(String oauthCode){
-        LoginResponseDto dto = googleLogin(oauthCode);
-        return tempAuthCodeStore.save(dto); // 1회용 코드 발급
-    }
-
-    // 프론트 교환용 1회용 코드
-    @Transactional(readOnly = true)
-    public LoginResponseDto exchangeAuthCode(String authCode){
-        LoginResponseDto dto = tempAuthCodeStore.consume(authCode);
-        if(dto == null){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid or expired code");
-        }
-        return dto;
-    }
-
     public LoginResponseDto googleLogin(String code) {
         try {
             // 1. code로 id_token 받아오기
