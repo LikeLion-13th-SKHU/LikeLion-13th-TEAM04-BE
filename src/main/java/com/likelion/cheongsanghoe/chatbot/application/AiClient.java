@@ -28,9 +28,7 @@ public class AiClient {
     // 백 -> AI(Flask) 호출 (Flask 서버의 /chatbot/ask로 HTTP POST)
 
     @Value("${ai.base-url}")
-    private String baseUrl; // ex. /http://localhost:8080
-    @Value("${ai.secret}")
-    private String secret; // ex. super-secret
+    private String baseUrl;
 
     private RestClient client;
     private final ObjectMapper om = new ObjectMapper();
@@ -57,7 +55,6 @@ public class AiClient {
             var res = client.post()
                     .uri("/chat")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header("X-AI-SIGN", hmac(secret, json))
                     .body(json)
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError,
