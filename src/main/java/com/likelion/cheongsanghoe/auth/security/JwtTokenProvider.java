@@ -1,5 +1,6 @@
 package com.likelion.cheongsanghoe.auth.security;
 
+import com.likelion.cheongsanghoe.exception.InvalidTokenException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,9 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class JwtTokenProvider {
@@ -19,16 +18,18 @@ public class JwtTokenProvider {
     private final SecretKey key;
     private final long validityInMilliseconds;
 
-    public JwtTokenProvider(@Value("${jwt.secret:myDefaultSecretKeyThatIsLongEnoughForHS256Algorithm}") String secretKey,
-                            @Value("${jwt.validity:3600000}") long validityInMilliseconds) {
+    // 블랙리스트 저장소 (간단히 메모리 기반, 추후 Redis 등으로 교체 가능)
+    private final List<String> blacklistedTokens = Collections.synchronizedList(new ArrayList<>());
+
+    public JwtTokenProvider(
+            @Value("${jwt.secret:myDefaultSecretKeyThatIsLongEnoughForHS256Algorithm}") String secretKey,
+            @Value("${jwt.validity:3600000}") long validityInMilliseconds) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
         this.validityInMilliseconds = validityInMilliseconds;
     }
 
-
     public String getEmailFromToken(String token) {
         try {
-
             Claims claims = Jwts.parser()
                     .verifyWith(key)
                     .build()
@@ -39,7 +40,6 @@ public class JwtTokenProvider {
             return null;
         }
     }
-
 
     public String getRoleFromToken(String token) {
         try {
@@ -54,8 +54,11 @@ public class JwtTokenProvider {
         }
     }
 
-
     public boolean validateToken(String token) {
+        if (isBlacklisted(token)) {
+            throw new InvalidTokenException("이미 만료되었거나 무효화된 토큰입니다.");
+        }
+
         try {
             Jwts.parser()
                     .verifyWith(key)
@@ -63,10 +66,9 @@ public class JwtTokenProvider {
                     .parseSignedClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            return false;
+            throw new InvalidTokenException("유효하지 않은 토큰입니다.");
         }
     }
-
 
     public String createToken(String email, String role) {
         Date now = new Date();
@@ -81,13 +83,12 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-
     public Authentication getAuthentication(String token) {
         String email = getEmailFromToken(token);
         String role = getRoleFromToken(token);
 
         if (email == null) {
-            return null;
+            throw new InvalidTokenException("토큰에서 이메일 정보를 가져올 수 없습니다.");
         }
 
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(
@@ -96,7 +97,6 @@ public class JwtTokenProvider {
 
         return new UsernamePasswordAuthenticationToken(email, token, authorities);
     }
-
 
     public boolean isTokenExpired(String token) {
         try {
@@ -111,8 +111,6 @@ public class JwtTokenProvider {
         }
     }
 
-    private final List<String> blacklistedTokens = Collections.synchronizedList(new java.util.ArrayList<>());
-
     public void addToBlacklist(String token) {
         blacklistedTokens.add(token);
     }
@@ -123,6 +121,5 @@ public class JwtTokenProvider {
 
     public void invalidateToken(String token) {
         blacklistedTokens.add(token);
-
     }
 }

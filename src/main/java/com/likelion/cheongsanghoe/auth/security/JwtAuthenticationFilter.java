@@ -1,9 +1,9 @@
 package com.likelion.cheongsanghoe.auth.security;
 
-import com.likelion.cheongsanghoe.auth.security.JwtTokenProvider;
 import com.likelion.cheongsanghoe.auth.domain.User;
 import com.likelion.cheongsanghoe.auth.domain.repository.UserRepository;
 import com.likelion.cheongsanghoe.auth.security.oauth2.UserPrincipal;
+import com.likelion.cheongsanghoe.exception.MemberNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -39,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = jwtTokenProvider.getEmailFromToken(jwt);
 
                 User user = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: " + email));
+                        .orElseThrow(() -> new MemberNotFoundException("탈퇴했거나 존재하지 않는 회원입니다: " + email));
 
                 UserPrincipal userPrincipal = UserPrincipal.create(user);
                 UsernamePasswordAuthenticationToken authentication =
@@ -63,9 +63,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 쿠키 access
         Cookie[] cookies = request.getCookies();
-        if(cookies != null){
+        if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if("access".equals(cookie.getName()) && StringUtils.hasText(cookie.getValue())){
+                if ("access".equals(cookie.getName()) && StringUtils.hasText(cookie.getValue())) {
                     return cookie.getValue();
                 }
             }
