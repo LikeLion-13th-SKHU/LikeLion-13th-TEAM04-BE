@@ -11,12 +11,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,7 +39,7 @@ public class AuthController {
             HttpServletResponse response) throws IOException {
         LoginResponseDto dto = authService.googleLogin(code);
         return new ResponseEntity<>(dto, HttpStatus.OK);
-    }
+        }
 
     @PostMapping("/role")
     @Operation(summary = "사용자 역할 선택", description = "로그인한 사용자의 역할(구직자/구인자)을 선택합니다")
@@ -68,22 +70,6 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/users/me")
-    @Operation(summary = "회원 탈퇴", description = "현재 로그인된 사용자를 완전히 삭제합니다 (재로그인 불가)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "회원 탈퇴 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
-            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
-    })
-    public ResponseEntity<Map<String, String>> deleteUser(HttpServletRequest request) {
-        String token = extractToken(request);
-        authService.deleteUser(token); // 서비스에서 실제 DB에서 회원 삭제 처리
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("message", "회원 탈퇴가 완료되었습니다. 더 이상 로그인할 수 없습니다.");
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping("/users/me")
     @Operation(summary = "현재 사용자 정보 조회", description = "현재 로그인된 사용자의 정보를 조회합니다")
     @ApiResponses(value = {
@@ -104,6 +90,7 @@ public class AuthController {
             return bearerToken.substring(7);
         }
 
+        // 쿠기 access
         if (request.getCookies() != null) {
             for (jakarta.servlet.http.Cookie c : request.getCookies()) {
                 if ("access".equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
