@@ -6,6 +6,7 @@ import com.likelion.cheongsanghoe.exception.MemberNotFoundException;
 import com.likelion.cheongsanghoe.exception.DuplicateNicknameException;
 import com.likelion.cheongsanghoe.exception.DuplicatePhoneNumberException;
 import com.likelion.cheongsanghoe.exception.MemberAlreadyExistException;
+import com.likelion.cheongsanghoe.exception.InactiveMemberException;
 import com.likelion.cheongsanghoe.member.api.dto.request.MemberUpdateRequestDto;
 import com.likelion.cheongsanghoe.member.api.dto.response.MemberInfoResponseDto;
 import com.likelion.cheongsanghoe.member.domain.Member;
@@ -32,7 +33,7 @@ public class MemberService {
         log.info("Creating member profile for user email: {}", email);
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new MemberNotFoundException("사용자를 찾을 수 없습니다: " + email));
 
         if (memberRepository.findByUser(user).isPresent()) {
             throw new MemberAlreadyExistException("회원이 이미 존재합니다. email: " + email);
@@ -75,7 +76,7 @@ public class MemberService {
         log.info("Updating member info for user email: {}", email);
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new MemberNotFoundException("사용자를 찾을 수 없습니다: " + email));
         Member member = memberRepository.findByUser(user)
                 .orElseThrow(() -> new MemberNotFoundException("회원 정보를 찾을 수 없습니다."));
 
@@ -114,7 +115,7 @@ public class MemberService {
         log.info("Withdrawing member for user email: {}", email);
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new MemberNotFoundException("사용자를 찾을 수 없습니다: " + email));
         Member member = memberRepository.findByUser(user)
                 .orElseThrow(() -> new MemberNotFoundException("회원 정보를 찾을 수 없습니다."));
 
@@ -125,7 +126,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberInfoResponseDto getMemberInfoByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new MemberNotFoundException("사용자를 찾을 수 없습니다: " + email));
         Member member = memberRepository.findByUser(user)
                 .orElseThrow(() -> new MemberNotFoundException("회원 정보를 찾을 수 없습니다."));
         return MemberInfoResponseDto.of(member);
@@ -138,7 +139,7 @@ public class MemberService {
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 
         if (!member.isActive()) {
-            throw new RuntimeException("비활성화된 회원입니다.");
+            throw new InactiveMemberException(memberId);
         }
 
         return MemberInfoResponseDto.of(member);
@@ -184,7 +185,6 @@ public class MemberService {
         return members.map(MemberInfoResponseDto::of);
     }
 
-    // 역할 있는 전체 활성 회원 슈 (추가함)
     @Transactional(readOnly = true)
     public long countActiveMembersWithRole() {
         Long count = memberRepository.countActiveMembersWithRole();
