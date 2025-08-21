@@ -8,6 +8,8 @@ import com.likelion.cheongsanghoe.auth.security.JwtTokenProvider;
 import com.likelion.cheongsanghoe.auth.domain.repository.UserRepository;
 import com.likelion.cheongsanghoe.auth.domain.Role;
 import com.likelion.cheongsanghoe.auth.domain.User;
+import com.likelion.cheongsanghoe.exception.InvalidTokenException;
+import com.likelion.cheongsanghoe.exception.MemberNotFoundException;
 import com.likelion.cheongsanghoe.member.domain.repository.MemberRepository;
 import com.likelion.cheongsanghoe.member.domain.Member;
 import com.likelion.cheongsanghoe.member.domain.MemberStatus;
@@ -47,6 +49,7 @@ public class AuthService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+
     public LoginResponseDto googleLogin(String code) {
         try {
             // 1. code로 id_token 받아오기
@@ -63,6 +66,11 @@ public class AuthService {
 
             if (existingUser.isPresent()) {
                 User user = existingUser.get();
+
+                if (!userRepository.existsById(user.getId())) {
+                    throw new MemberNotFoundException("이미 탈퇴한 계정입니다: " + email);
+                }
+
                 // Member 정보 조회
                 Optional<Member> memberOpt = memberRepository.findByUser(user);
 
@@ -109,7 +117,78 @@ public class AuthService {
         }
     }
 
-//    // 구글 토큰 엔드포인트에서 id_token 가져오기
+
+    @Transactional
+    public void deleteUser(String token) {
+        // 토큰 유효성 검사
+        if (!jwtTokenProvider.validateToken(token)) {
+            throw new InvalidTokenException("유효하지 않은 토큰으로 회원 탈퇴를 시도했습니다.");
+        }
+
+        String email = jwtTokenProvider.getEmailFromToken(token);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberNotFoundException("사용자를 찾을 수 없습니다: " + email));
+
+        log.info("회원 물리적 삭제 시작 - 이메일: {}, 사용자ID: {}", email, user.getId());
+
+        try {
+            // User 엔티티에 CASCADE 설정이 있어서 User만 삭제하면 Member도 자동 삭제됨
+            // 하지만 안전을 위해 명시적으로 Member 먼저 삭제
+            Optional<Member> memberOpt = memberRepository.findByUser(user);
+            if (memberOpt.isPresent()) {
+                Member member = memberOpt.get();
+                log.info("Member 삭제 - ID: {}, 닉네임: {}", member.getId(), member.getNickname());
+                memberRepository.delete(member);
+                memberRepository.flush(); // 즉시 DB에 반영
+            }
+
+            // User 삭제
+            log.info("User 삭제 - ID: {}, 이메일: {}", user.getId(), user.getEmail());
+            userRepository.delete(user);
+            userRepository.flush(); // 즉시 DB에 반영
+
+            // 사용 중인 토큰 블랙리스트 등록
+            jwtTokenProvider.invalidateToken(token);
+
+            log.info("회원 물리적 삭제 완료 - 이메일: {}", email);
+
+        } catch (Exception e) {
+            log.error("회원 물리적 삭제 중 오류 발생 - 이메일: {}, 오류: {}", email, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "회원 삭제 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+    public AuthResponseDto selectRole(String token, RoleSelectionRequestDto requestDto) {
+        String email = jwtTokenProvider.getEmailFromToken(token);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberNotFoundException("사용자를 찾을 수 없습니다."));
+
+        user.updateRole(Role.valueOf(requestDto.getRole()));
+        User updatedUser = userRepository.save(user);
+
+        // Member 정보도 함께 조회
+        Optional<Member> member = memberRepository.findByUser(user);
+
+        return AuthResponseDto.from(updatedUser, member.orElse(null));
+    }
+
+    public void logout(String token) {
+        jwtTokenProvider.invalidateToken(token);
+    }
+
+    @Transactional(readOnly = true)
+    public AuthResponseDto getCurrentUser(String token) {
+        String email = jwtTokenProvider.getEmailFromToken(token);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberNotFoundException("사용자를 찾을 수 없습니다."));
+
+        Optional<Member> member = memberRepository.findByUser(user);
+
+        return AuthResponseDto.from(user, member.orElse(null));
+    }
+
+    // 구글 토큰 엔드포인트에서 id_token 가져오기
     private String getGoogleIdToken(String code) {
         String tokenUrl = "https://oauth2.googleapis.com/token";
 
@@ -144,37 +223,6 @@ public class AuthService {
         } catch(Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to parse id_token");
         }
-    }
-
-
-    public AuthResponseDto selectRole(String token, RoleSelectionRequestDto requestDto) {
-        String email = jwtTokenProvider.getEmailFromToken(token);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        user.updateRole(Role.valueOf(requestDto.getRole()));
-        User updatedUser = userRepository.save(user);
-
-        // Member 정보도 함께 조회
-        Optional<Member> member = memberRepository.findByUser(user);
-
-        return AuthResponseDto.from(updatedUser, member.orElse(null));
-    }
-
-    public void logout(String token) {
-        jwtTokenProvider.invalidateToken(token);
-    }
-
-    @Transactional(readOnly = true)
-    public AuthResponseDto getCurrentUser(String token) {
-        String email = jwtTokenProvider.getEmailFromToken(token);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-
-        Optional<Member> member = memberRepository.findByUser(user);
-
-        return AuthResponseDto.from(user, member.orElse(null));
     }
 
     private String getGoogleAccessToken(String code) {

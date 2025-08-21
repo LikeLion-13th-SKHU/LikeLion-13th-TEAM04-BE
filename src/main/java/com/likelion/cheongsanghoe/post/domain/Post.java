@@ -22,7 +22,7 @@ public class Post {
     private String title;
     private String content;
     private String location;
-    private int salary;
+    private Integer salary;
     private String work_time;
     private String tags;
     private String deadline;
@@ -36,7 +36,7 @@ public class Post {
     private Category category;
 
     @Builder
-    private Post(String title, String content, String location, int salary, String work_time, String tags,String deadline,
+    private Post(String title, String content, String location, Integer salary, String work_time, String tags,String deadline,
                  int num, String work_period, LocalDate createAt, Category category, String imageUrl ) {
         this.title = title;
         this.content = content;
