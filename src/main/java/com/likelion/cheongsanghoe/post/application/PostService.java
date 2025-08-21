@@ -36,7 +36,7 @@ public class PostService {
     @Transactional
     public Response<Long> postSave(PostSaveRequestDto postSaveRequestDto, Long userId) {
         if(postSaveRequestDto.category() == null){
-            throw new CustomException(ErrorStatus.INVALID_PARAMETER);
+            throw new CustomException(ErrorStatus.POST_CREATE_FAILED);
         }
         //이미지 업로드 처리
         String imgaeUrl = null;
@@ -78,36 +78,28 @@ public class PostService {
                 .imageUrl(imgaeUrl)
                 .build();
         postRepository.save(post);
-        return Response.success(SuccessStatus.CREATED, post.getPostId());
+        return Response.success(SuccessStatus.POST_CREATED, post.getPostId());
     }
 
     //PostId로 공고 상세 조회
     public PostInfoResponseDto getPostId(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorStatus.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorStatus.POST_NOT_FOUND));
         return PostInfoResponseDto.from(post);
     }
 
-    //공고 전체 조회(요약)
-    public PostListResponseDto_Summary postFindAll() {
-        List<Post> posts = postRepository.findAll();
-        List<PostSummaryResponseDto> postSummaryResponseDtos = posts.stream()
-                .map(PostSummaryResponseDto::from)
-                .toList();
-        return PostListResponseDto_Summary.from(postSummaryResponseDtos);
-    }
     //공고 수정
     @Transactional
     public void postUpdate(Long postId, PostUpdateRequestDto postUpdateRequestDto) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorStatus.BAD_REQUEST));
+                .orElseThrow(() -> new CustomException(ErrorStatus.POST_NOT_FOUND));
         post.update(postUpdateRequestDto);
     }
     //공고 삭제
     @Transactional
     public void postDelete(Long postId){
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorStatus.BAD_REQUEST));
+                .orElseThrow(() -> new CustomException(ErrorStatus.POST_NOT_FOUND));
         postRepository.delete(post);
     }
     //공고 요약 전체 조회(페이지네이션)
@@ -140,7 +132,7 @@ public class PostService {
     }
     //메인페이지 최신 공고 메서드
     public List<PostSummaryResponseDto> getMainPost(int limit){
-        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "creatAt"));
+        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createAt"));
 
         Page<Post> recentPost = postRepository.findAll(pageable);
 

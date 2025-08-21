@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
-    List<Post> findByCategory(Category category);
+    //List<Post> findByCategory(Category category);
     //특정 카테고리의 공고 수를 카운트
     long countByCategory(Category category);
     //카테고리별 조회

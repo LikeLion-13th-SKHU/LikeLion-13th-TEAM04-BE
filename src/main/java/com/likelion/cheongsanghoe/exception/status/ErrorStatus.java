@@ -2,6 +2,7 @@ package com.likelion.cheongsanghoe.exception.status;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -46,7 +47,13 @@ public enum ErrorStatus {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI500","내부 서버 오류"),
 
     //image
-    IMAGE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "image400", "이미지 업로드 실패");
+    IMAGE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "image400", "이미지 업로드 실패"),
+
+    //post
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST404", "공고를 찾을 수 없습니다."),
+    POST_ALREADY_DELETE(HttpStatus.BAD_REQUEST,"POST400", "이미 삭제된 게시글입니다."),
+    POST_CREATE_FAILED(HttpStatus.BAD_REQUEST, "POST400", "공고 생성을 실패했습니다."),
+    POST_UPDATE_FAILED(HttpStatus.BAD_REQUEST,"POST400", "공고 수정에 실패했습니다.");
     private final HttpStatus status;
     private final String code;
     private final String message;
