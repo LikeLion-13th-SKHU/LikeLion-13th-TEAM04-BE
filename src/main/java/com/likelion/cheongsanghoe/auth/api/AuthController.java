@@ -105,7 +105,7 @@ public class AuthController {
     @Operation(summary = "OAuth2 로그인 성공", description = "OAuth2 로그인 성공 시 호출되는 엔드포인트")
     @ApiResponse(responseCode = "200", description = "로그인 성공 응답")
     public ResponseEntity<Map<String, String>> oauth2Success() {
-        Map<String, String> response = new Hgit ashMap<>();
+        Map<String, String> response = new HashMap<>();
         response.put("status", "success");
         response.put("message", "Google OAuth2 로그인 성공!");
         return ResponseEntity.ok(response);
