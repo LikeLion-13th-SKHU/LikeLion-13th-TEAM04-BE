@@ -57,8 +57,15 @@ public class SecurityConfig {
                                 "/favicon.ico"
                         ).permitAll()
 
+                        // 포트폴리오 조회는 인증 없이 허용
                         .requestMatchers(HttpMethod.GET, "/api/portfolios/**").permitAll()
+
+                        // 메인페이지에서 회원 역할별 조회는 인증 없이 허용
+                        .requestMatchers(HttpMethod.GET, "/api/members/by-role").permitAll()
+
+                        // 나머지 members API는 인증 필요
                         .requestMatchers("/api/members/**").authenticated()
+
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/ai/**").permitAll()
                         .anyRequest().authenticated()
