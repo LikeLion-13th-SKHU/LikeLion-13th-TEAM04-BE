@@ -5,6 +5,8 @@ import com.likelion.cheongsanghoe.portfolio.domain.Portfolio;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
     Page<Portfolio> findByMember(Member member, Pageable pageable);
@@ -13,4 +15,16 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
 
     Page<Portfolio> findByTitleContainingOrContentContaining(String title, String content, Pageable pageable);
 
+    @Query("SELECT p FROM Portfolio p WHERE " +
+            "(:keyword IS NULL OR :keyword = '' OR p.title LIKE %:keyword% OR p.content LIKE %:keyword%) AND " +
+            "(:category IS NULL OR :category = '' OR p.category LIKE %:category%) AND " +
+            "(:skills IS NULL OR :skills = '' OR p.skills LIKE %:skills%) AND " +
+            "(:experience IS NULL OR :experience = '' OR p.experience = :experience) AND " +
+            "(:hourlyRate IS NULL OR :hourlyRate = '' OR p.hourlyRate LIKE %:hourlyRate%)")
+    Page<Portfolio> findBySearchCriteria(@Param("keyword") String keyword,
+                                         @Param("category") String category,
+                                         @Param("skills") String skills,
+                                         @Param("experience") String experience,
+                                         @Param("hourlyRate") String hourlyRate,
+                                         Pageable pageable);
 }
