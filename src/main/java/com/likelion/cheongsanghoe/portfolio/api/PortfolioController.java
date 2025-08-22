@@ -93,37 +93,52 @@ public class PortfolioController {
     @GetMapping("/search")
     public ResponseEntity<Page<PortfolioResponseDto>> searchPortfolios(
             @Parameter(description = "검색 키워드 (제목, 내용에서 검색)",
-                    example = "Spring Boot",
-                    required = false)
+                    example = "Spring Boot")
             @RequestParam(required = false) String keyword,
 
             @Parameter(description = "업무 분야",
-                    example = "영상/편집",
-                    required = false)
+                    example = "영상/편집")
             @RequestParam(required = false) String category,
 
             @Parameter(description = "보유 기술/재능",
-                    example = "Premiere Pro",
-                    required = false)
+                    example = "Premiere Pro")
             @RequestParam(required = false) String skills,
 
             @Parameter(description = "경험 수준",
-                    example = "중급자",
-                    required = false)
+                    example = "중급자")
             @RequestParam(required = false) String experience,
 
             @Parameter(description = "시급/요금 정보",
-                    example = "시급 15,000원",
-                    required = false)
+                    example = "시급 15,000원")
             @RequestParam(required = false) String hourlyRate,
+
+            // 새로운 검색 조건들 추가
+            @Parameter(description = "평일 가능 여부",
+                    example = "true")
+            @RequestParam(required = false) Boolean weekday,
+
+            @Parameter(description = "주말 가능 여부",
+                    example = "false")
+            @RequestParam(required = false) Boolean weekend,
+
+            @Parameter(description = "저녁시간 가능 여부",
+                    example = "true")
+            @RequestParam(required = false) Boolean evening,
+
+            @Parameter(description = "유연한 시간 가능 여부",
+                    example = "true")
+            @RequestParam(required = false) Boolean flexible,
 
             @Parameter(description = "페이징 정보 (page, size, sort)",
                     example = "page=0&size=20&sort=createdAt,desc")
             Pageable pageable) {
-        log.info("Searching portfolios with keyword: {}, category: {}, skills: {}, experience: {}, hourlyRate: {}",
-                keyword, category, skills, experience, hourlyRate);
+        log.info("Searching portfolios with keyword: {}, category: {}, skills: {}, experience: {}, hourlyRate: {}, " +
+                        "weekday: {}, weekend: {}, evening: {}, flexible: {}",
+                keyword, category, skills, experience, hourlyRate, weekday, weekend, evening, flexible);
 
-        Page<PortfolioResponseDto> response = portfolioService.searchPortfolios(keyword, category, skills, experience, hourlyRate, pageable);
+        Page<PortfolioResponseDto> response = portfolioService.searchPortfolios(
+                keyword, category, skills, experience, hourlyRate,
+                weekday, weekend, evening, flexible, pageable);
         return ResponseEntity.ok(response);
     }
 

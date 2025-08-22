@@ -3,9 +3,13 @@ package com.likelion.cheongsanghoe.portfolio.api.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "포트폴리오 수정 요청 DTO")
 public class PortfolioUpdateRequestDto {
 

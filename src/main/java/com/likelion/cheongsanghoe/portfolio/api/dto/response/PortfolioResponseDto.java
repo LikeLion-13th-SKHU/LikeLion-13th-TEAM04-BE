@@ -4,13 +4,17 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.likelion.cheongsanghoe.portfolio.api.dto.request.AvailableTimeDto;
 import com.likelion.cheongsanghoe.portfolio.domain.Portfolio;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "포트폴리오 응답 DTO")
 public class PortfolioResponseDto {
 
