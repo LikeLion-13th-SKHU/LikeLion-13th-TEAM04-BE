@@ -38,6 +38,14 @@ public enum ErrorStatus {
     NOT_CHAT_ROOM_MEMBER(HttpStatus.FORBIDDEN, "CHAT403", "해당 방의 참여자가 아닙니다."),
     NOT_ALLOWED_SELF_CHAT(HttpStatus.BAD_REQUEST, "CHAT400", "자기 자신과는 채팅방을 생성할 수 없습니다."),
 
+    // chatBot
+    BOT_MEMBER_NOT_INITIALIZED(HttpStatus.INTERNAL_SERVER_ERROR, "CHAT500", "봇 멤버가 초기화되지 않았습니다."),
+    AI_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "AI500","AI 응답 시간 초과"),
+    AI_SERVER_ERROR(HttpStatus.BAD_GATEWAY, "AI500","AI 서버 오류"),
+    AI_BAD_RESPONSE(HttpStatus.BAD_GATEWAY, "AI500","AI 응답 포맷 오류"),
+    AI_CLIENT_ERROR(HttpStatus.BAD_REQUEST, "AI500","AI 요청 오류"),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI500","내부 서버 오류"),
+
     //image
     IMAGE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "image400", "이미지 업로드 실패"),
 

@@ -7,10 +7,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionalHandler {
-    @ExceptionHandler(CustomException.class)
-    protected ResponseEntity<Response<?>> handleDuplicateException(CustomException ex) {
-        ErrorStatus errorCode = ex.getErrorCode();
 
+    @ExceptionHandler(CustomException.class)
+    protected ResponseEntity<Response<?>> handleCustomException(CustomException ex) {
+        ErrorStatus errorCode = ex.getErrorCode();
+        ex.printStackTrace();
+        return new ResponseEntity<>(Response.fail(errorCode), errorCode.getStatus());
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    protected ResponseEntity<Response<?>> handleInvalidTokenException(InvalidTokenException ex) {
+        ErrorStatus errorCode = ex.getErrorStatus();
         ex.printStackTrace();
         return new ResponseEntity<>(Response.fail(errorCode), errorCode.getStatus());
     }

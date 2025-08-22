@@ -11,13 +11,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,17 +34,12 @@ public class AuthController {
 
     @GetMapping("/code/google")
     @Operation(summary = "Google OAuth2 콜백", description = "Google OAuth2 인증 후 콜백을 처리하여 로그인을 완료합니다")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그인 성공",
-                    content = @Content(schema = @Schema(implementation = LoginResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 인증 코드"),
-            @ApiResponse(responseCode = "500", description = "서버 오류")
-    })
-    public LoginResponseDto googleCallback(
-            @Parameter(description = "Google OAuth2 인증 코드", required = true)
-            @RequestParam(name = "code") String code) {
-        return authService.googleLogin(code);
-    }
+    public ResponseEntity<LoginResponseDto> googleCallback(
+            @RequestParam("code") String code,
+            HttpServletResponse response) throws IOException {
+        LoginResponseDto dto = authService.googleLogin(code);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+        }
 
     @PostMapping("/role")
     @Operation(summary = "사용자 역할 선택", description = "로그인한 사용자의 역할(구직자/구인자)을 선택합니다")
@@ -55,7 +53,7 @@ public class AuthController {
             @Parameter(description = "역할 선택 요청 정보", required = true)
             @RequestBody RoleSelectionRequestDto requestDto,
             HttpServletRequest request) {
-        String token = extractTokenFromHeader(request);
+        String token = extractToken(request);
         AuthResponseDto response = authService.selectRole(token, requestDto);
         return ResponseEntity.ok(response);
     }
@@ -67,7 +65,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
     })
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-        String token = extractTokenFromHeader(request);
+        String token = extractToken(request);
         authService.logout(token);
         return ResponseEntity.ok().build();
     }
@@ -81,15 +79,24 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
     public ResponseEntity<AuthResponseDto> getCurrentUser(HttpServletRequest request) {
-        String token = extractTokenFromHeader(request);
+        String token = extractToken(request);
         AuthResponseDto response = authService.getCurrentUser(token);
         return ResponseEntity.ok(response);
     }
 
-    private String extractTokenFromHeader(HttpServletRequest request) {
+    private String extractToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
+        }
+
+        // 쿠기 access
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie c : request.getCookies()) {
+                if ("access".equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
+                    return c.getValue();
+                }
+            }
         }
         return null;
     }

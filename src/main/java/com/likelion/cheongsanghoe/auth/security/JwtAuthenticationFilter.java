@@ -1,11 +1,12 @@
 package com.likelion.cheongsanghoe.auth.security;
 
-import com.likelion.cheongsanghoe.auth.security.JwtTokenProvider;
 import com.likelion.cheongsanghoe.auth.domain.User;
 import com.likelion.cheongsanghoe.auth.domain.repository.UserRepository;
 import com.likelion.cheongsanghoe.auth.security.oauth2.UserPrincipal;
+import com.likelion.cheongsanghoe.exception.MemberNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,31 +35,65 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = getJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
-                String email = jwtTokenProvider.getEmailFromToken(jwt);
+            if (StringUtils.hasText(jwt)) {
 
-                User user = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: " + email));
+                if (jwtTokenProvider.isBlacklisted(jwt)) {
+                    log.debug("블랙리스트된 토큰으로 접근 시도: {}", jwt.substring(0, Math.min(jwt.length(), 10)) + "...");
+                    filterChain.doFilter(request, response);
+                    return;
+                }
 
-                UserPrincipal userPrincipal = UserPrincipal.create(user);
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (jwtTokenProvider.validateToken(jwt)) {
+                    String email = jwtTokenProvider.getEmailFromToken(jwt);
+
+                    if (email != null) {
+
+                        try {
+                            User user = userRepository.findByEmail(email)
+                                    .orElseThrow(() -> new MemberNotFoundException("탈퇴했거나 존재하지 않는 회원입니다: " + email));
+
+                            UserPrincipal userPrincipal = UserPrincipal.create(user);
+                            UsernamePasswordAuthenticationToken authentication =
+                                    new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
+                            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                        } catch (MemberNotFoundException e) {
+
+                            log.info("물리적으로 삭제된 사용자의 토큰을 블랙리스트에 추가: {}", email);
+                            jwtTokenProvider.invalidateToken(jwt);
+                        }
+                    }
+                }
             }
         } catch (Exception ex) {
             log.error("사용자 인증을 설정할 수 없습니다", ex);
+
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
+
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
+
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("access".equals(cookie.getName()) && StringUtils.hasText(cookie.getValue())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
         return null;
     }
 }

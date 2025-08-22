@@ -58,9 +58,9 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/portfolios/**").permitAll()
-
                         .requestMatchers("/api/members/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/ai/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(AbstractHttpConfigurer::disable)
@@ -71,10 +71,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowCredentials(true); // 쿠키 전송 허용
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
