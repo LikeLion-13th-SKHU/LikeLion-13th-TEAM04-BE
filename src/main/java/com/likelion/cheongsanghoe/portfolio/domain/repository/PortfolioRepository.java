@@ -20,11 +20,20 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
             "(:category IS NULL OR :category = '' OR p.category LIKE %:category%) AND " +
             "(:skills IS NULL OR :skills = '' OR p.skills LIKE %:skills%) AND " +
             "(:experience IS NULL OR :experience = '' OR p.experience = :experience) AND " +
-            "(:hourlyRate IS NULL OR :hourlyRate = '' OR p.hourlyRate LIKE %:hourlyRate%)")
-    Page<Portfolio> findBySearchCriteria(@Param("keyword") String keyword,
-                                         @Param("category") String category,
-                                         @Param("skills") String skills,
-                                         @Param("experience") String experience,
-                                         @Param("hourlyRate") String hourlyRate,
-                                         Pageable pageable);
+            "(:hourlyRate IS NULL OR :hourlyRate = '' OR p.hourlyRate LIKE %:hourlyRate%) AND " +
+            "(:weekday IS NULL OR p.availableTime.weekday = :weekday) AND " +
+            "(:weekend IS NULL OR p.availableTime.weekend = :weekend) AND " +
+            "(:evening IS NULL OR p.availableTime.evening = :evening) AND " +
+            "(:flexible IS NULL OR p.availableTime.flexible = :flexible)")
+    Page<Portfolio> findBySearchCriteriaWithAvailableTime(
+            @Param("keyword") String keyword,
+            @Param("category") String category,
+            @Param("skills") String skills,
+            @Param("experience") String experience,
+            @Param("hourlyRate") String hourlyRate,
+            @Param("weekday") Boolean weekday,
+            @Param("weekend") Boolean weekend,
+            @Param("evening") Boolean evening,
+            @Param("flexible") Boolean flexible,
+            Pageable pageable);
 }
