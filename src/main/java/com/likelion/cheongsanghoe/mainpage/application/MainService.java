@@ -29,6 +29,7 @@ public class MainService {
     public List<MainCategoryResponseDto> getMainCategory(int limit){
         return postService.getMainCategory(limit);
     }
+
     //최신 공고
     public List<PostSummaryResponseDto> getMainPost(int limit){
         return postService.getMainPost(limit);
@@ -42,12 +43,9 @@ public class MainService {
     //등록된 포트폴리오 수
     public long getMainPortfolioCount(){
         Pageable pageable = PageRequest.of(0, 1);
-        Page<PortfolioResponseDto> allPortfolios = portfolioService.searchPortfolios(null, pageable);
+
+        Page<PortfolioResponseDto> allPortfolios = portfolioService.searchPortfolios(null, null, null, null, null, pageable);
 
         return allPortfolios.getTotalElements();
     }
-
-
-
-
 }
