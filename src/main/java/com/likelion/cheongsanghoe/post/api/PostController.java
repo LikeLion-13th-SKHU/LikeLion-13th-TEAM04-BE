@@ -3,6 +3,7 @@ package com.likelion.cheongsanghoe.post.api;
 import com.likelion.cheongsanghoe.exception.Response;
 import com.likelion.cheongsanghoe.exception.status.SuccessStatus;
 import com.likelion.cheongsanghoe.global.api.dto.response.PaginationDto;
+import com.likelion.cheongsanghoe.portfolio.api.dto.response.PortfolioResponseDto;
 import com.likelion.cheongsanghoe.post.api.dto.request.PostUpdateRequestDto;
 import com.likelion.cheongsanghoe.post.api.dto.response.*;
 import com.likelion.cheongsanghoe.post.application.PostService;
@@ -11,6 +12,11 @@ import com.likelion.cheongsanghoe.post.application.SearchService;
 import com.likelion.cheongsanghoe.post.domain.Category;
 import com.likelion.cheongsanghoe.post.domain.Post;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,7 +44,12 @@ public class PostController {
     private final SearchService searchService;
 
     //공고 생성
-    @Operation(summary = "공고 생성")
+    @Operation(summary = "공고 생성", description = "공고를 새로 작성합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "공고 생성 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "401", description = "인증 필요")
+    })
     @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Response<Long>> postSave(@ModelAttribute @Valid PostSaveRequestDto postSaveRequestDto, HttpServletRequest request) {
         //순수한 토큰값만 분리 메서드(extractTokenFromHeader)
@@ -57,16 +68,25 @@ public class PostController {
     }
 
     //postId로 공고 상세 조회
-    @Operation(summary = "postId로 공고 상세 조회")
+    @Operation(summary = "postId로 공고 상세 조회", description = "postId로 공고 상세조회")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "공고 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "공고를 찾을 수 없음")
+    })
     @GetMapping("/{postId}")
-    public Response<PostInfoResponseDto> PostFindById(@PathVariable("postId")Long postId) {
+    public Response<PostInfoResponseDto> PostFindById(@Parameter(description = "공고Id", required = true, example = "1") @PathVariable("postId")Long postId) {
         PostInfoResponseDto postInfoResponseDto = postService.getPostId(postId);
         return Response.success(SuccessStatus.POST_SUCCESS,postInfoResponseDto);
     }
     //공고 전체 조회(요약 정보)
     @Operation(summary = "공고 전체 조회(요약된 공고 정보), 키워드랑 카테고리 쿼리 파라미터로 받는다(검색기능)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "공고 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "공고를 찾을 수 없음")
+    })
     @GetMapping
     public Response<PostPageResponseDto> postFindAll(
+            @Parameter(description = "공고 제목이나 내용을 입력하면 키워드로 검색", example = "20초 영상")
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Category category,
             //PageableDefault로 페이지네이션 기본값 적용, pageable 파라미터 추가
@@ -86,7 +106,12 @@ public class PostController {
         return Response.success(SuccessStatus.POST_SUCCESS,postPageResponseDto);
     }
     //postId로 공고 수정
-    @Operation(summary = "postId로 공고 수정")
+    @Operation(summary = "postId로 공고 수정", description = "postId로 해당 공고 내용 수정")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode ="200", description = "공고가 수정되었습니다."),
+            @ApiResponse(responseCode ="400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "403", description = "수정 권한 없음"),
+    })
     @PatchMapping("/{postId}")
     public Response<PostInfoResponseDto> postUpdate(@PathVariable("postId")Long postId, @RequestBody PostUpdateRequestDto postUpdateRequestDto) {
         postService.postUpdate(postId, postUpdateRequestDto);
@@ -94,9 +119,13 @@ public class PostController {
         return Response.success(SuccessStatus.POST_UPDATED,postInfoResponseDto);
     }
     //공고 삭제
-    @Operation(summary = "공고 삭제")
+    @Operation(summary = "공고 삭제", description = "postId 받아서 해당 공고 삭제")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "공고 삭제 성공"),
+            @ApiResponse(responseCode = "400", description = "이미 삭제된 공고입니다.")
+    })
     @DeleteMapping("/{postId}")
-    public Response<String> postDelete(@PathVariable("postId")Long postId) {
+    public Response<String> postDelete(@Parameter(description = "공고 ID", required = true, example = "1")@PathVariable("postId")Long postId) {
         postService.postDelete(postId);
         return Response.success(SuccessStatus.POST_DELETE,null);
     }
