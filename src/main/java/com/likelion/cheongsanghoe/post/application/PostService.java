@@ -1,5 +1,6 @@
 package com.likelion.cheongsanghoe.post.application;
 
+import com.likelion.cheongsanghoe.auth.security.JwtTokenProvider;
 import com.likelion.cheongsanghoe.exception.CustomException;
 import com.likelion.cheongsanghoe.exception.Response;
 import com.likelion.cheongsanghoe.exception.status.ErrorStatus;
@@ -31,12 +32,18 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class PostService {
     private final PostRepository postRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     //공고 저장
     @Transactional
-    public Response<Long> postSave(PostSaveRequestDto postSaveRequestDto, Long userId) {
+    public Response<Long> postSave(PostSaveRequestDto postSaveRequestDto, String token) {
         if(postSaveRequestDto.category() == null){
             throw new CustomException(ErrorStatus.POST_CREATE_FAILED);
+        }
+        //토큰 유효성 검사
+        String userEmail = jwtTokenProvider.getEmailFromToken(token);
+        if(userEmail == null){
+            throw new CustomException(ErrorStatus.INVALID_TOKEN);
         }
         //이미지 업로드 처리
         String imgaeUrl = null;
