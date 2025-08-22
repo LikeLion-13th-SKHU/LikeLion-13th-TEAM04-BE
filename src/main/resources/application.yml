@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: prod
 
   datasource:
     url: ${spring.datasource.url}
@@ -13,9 +13,9 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            client-id: ${spring.security.oauth2.client.registration.google.client-id}
+            client-secret: ${spring.security.oauth2.client.registration.google.client-secret}
+            redirect-uri: ${spring.security.oauth2.client.registration.google.redirect-uri}
             scope:
               - email
               - profile
@@ -43,4 +43,7 @@ logging:
     org.hibernate.type.descriptor.sql: trace
 
 swagger:
-  url: https://cheongsanghoe.store
+  url: ${SWAGGER_URL}
+
+ai:
+  base-url: ${AI_BASE_URL}

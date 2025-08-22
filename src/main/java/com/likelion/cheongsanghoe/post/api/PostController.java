@@ -12,6 +12,8 @@ import com.likelion.cheongsanghoe.post.domain.Category;
 import com.likelion.cheongsanghoe.post.domain.Post;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -38,11 +40,20 @@ public class PostController {
     //공고 생성
     @Operation(summary = "공고 생성")
     @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Response<Long>> postSave(@ModelAttribute @Valid PostSaveRequestDto postSaveRequestDto, @RequestHeader("userId") Long userId) {
-        Response<Long> response = postService.postSave(postSaveRequestDto, userId);
+    public ResponseEntity<Response<Long>> postSave(@ModelAttribute @Valid PostSaveRequestDto postSaveRequestDto, HttpServletRequest request) {
+        //순수한 토큰값만 분리 메서드(extractTokenFromHeader)
+        String token = extractTokenFromHeader(request);
+        Response<Long> response = postService.postSave(postSaveRequestDto, token);
         return ResponseEntity
                 .status(SuccessStatus.POST_CREATED.getStatus())
                 .body(response);
+    }
+    private String extractTokenFromHeader(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if(token != null && token.startsWith("Bearer ")) {
+            return token.substring(7);
+        }
+        return null;
     }
 
     //postId로 공고 상세 조회
