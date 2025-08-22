@@ -1,5 +1,6 @@
 package com.likelion.cheongsanghoe.auth.domain;
 
+import com.likelion.cheongsanghoe.member.domain.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -12,7 +13,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
@@ -30,6 +30,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Member member;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -46,15 +50,18 @@ public class User {
         this.role = role;
     }
 
+    // 챗봇 전용
+    public static User createBot(String email, String name){
+        User user = new User(email, name, null, null);
+        return user;
+    }
+
     public void updateRole(Role role) {
         this.role = role;
     }
-
 
     public void updateProfile(String name, String profileImage) {
         this.name = name;
         this.profileImage = profileImage;
     }
-
-
 }
