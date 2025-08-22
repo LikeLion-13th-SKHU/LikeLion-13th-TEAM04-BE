@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,17 +32,24 @@ public class ChatRestController {
 
     @Operation(summary = "채팅방 생성 또는 기존 채팅방 반환")
     @PostMapping("/rooms")
-    public ResponseEntity<Response<CreateRoomRes>> getOrCreateRoom(@RequestBody CreateRoomReq req) {
+    public ResponseEntity<Response<CreateRoomRes>> getOrCreateRoom(
+            @AuthenticationPrincipal(expression = "id") Long myId,
+            @RequestBody CreateRoomReq req) {
         Long roomId = chatRoomService.getOrCreateDirectRoom(
-                req.getMyId(), req.getOtherUserId(), req.getRoomName(), req.getPostId()
+                myId,
+                req.getOtherUserId(),
+                req.getRoomName(),
+                req.getPostId()
         );
         return ResponseEntity.ok(Response.success(SuccessStatus.SUCCESS, new CreateRoomRes(roomId)));
     }
 
     @Operation(summary = "내가 속한 방 목록 조회")
     @GetMapping("/rooms")
-    public ResponseEntity<Response<List<ChatRoomRes>>> myRooms(@RequestParam Long userId) {
-        List<ChatRoom> rooms = chatRoomService.getRoomsByUser(userId);
+    public ResponseEntity<Response<List<ChatRoomRes>>> myRooms(
+            @AuthenticationPrincipal(expression = "id") Long myId
+    ) {
+        List<ChatRoom> rooms = chatRoomService.getRoomsByUser(myId);
         List<ChatRoomRes> body = rooms.stream().map(ChatRoomRes::from).toList();
         return ResponseEntity.ok(Response.success(SuccessStatus.SUCCESS, body));
     }
@@ -49,7 +57,7 @@ public class ChatRestController {
     @Operation(summary = "채팅 메시지 저장(전송)")
     @PostMapping("/rooms/{roomId}/messages")
     public ResponseEntity<Response<ChatMessageRes>> sendMessage(@PathVariable Long roomId,
-                                                                @RequestHeader("userId") Long senderId,
+                                                                @AuthenticationPrincipal(expression = "id") Long senderId,
                                                                 @RequestBody SendMessageReq req){
         ChatMessage saved = chatMessageService.save(roomId, senderId, req.getType(), req.getContent());
         return ResponseEntity.ok(Response.success(SuccessStatus.SUCCESS, ChatMessageRes.from((saved))));
