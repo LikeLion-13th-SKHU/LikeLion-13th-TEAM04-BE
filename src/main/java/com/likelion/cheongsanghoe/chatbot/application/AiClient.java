@@ -25,7 +25,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AiClient {
 
-    // 백 -> AI(Flask) 호출 (Flask 서버의 /chatbot/ask로 HTTP POST)
+    // 백 -> AI(Flask) 호출 (Flask 서버의 /chat/ask로 HTTP POST)
 
     @Value("${ai.base-url}")
     private String baseUrl;
@@ -53,7 +53,7 @@ public class AiClient {
 
         try{
             var res = client.post()
-                    .uri("/chat")
+                    .uri("/chat/ask")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(json)
                     .retrieve()
@@ -66,12 +66,26 @@ public class AiClient {
                         throw new CustomException(ErrorStatus.AI_SERVER_ERROR, "AI 5xx: " + r.getStatusCode());
                     }).body(Map.class);
 
-            // answer키가 반드시 있어야 함
-            Object answer = (res == null) ? null : res.get("answer");
-            if (answer == null) {
-                throw new CustomException(ErrorStatus.AI_BAD_RESPONSE, "AI 응답 포맷 오류");
+            // 이전 포맷
+            Object answer = res.get("answer");
+            if(answer instanceof String s && !s.isBlank()){
+                return s;
             }
-            return String.valueOf(answer);
+            // 현재 포맷
+            Object success = res.get("success");
+            if(Boolean.FALSE.equals(success)){
+                String msg = String.valueOf(res.getOrDefault("message", "AI 처리 실패"));
+                throw new CustomException(ErrorStatus.AI_CLIENT_ERROR, msg);
+            }
+
+            Object data = res.get("data");
+            if(data instanceof Map<?, ?> d){
+                Object reply = d.get("reply");
+                if(reply != null && !String.valueOf(reply).isBlank()){
+                    return String.valueOf(reply);
+                }
+            }
+            throw new CustomException(ErrorStatus.AI_BAD_RESPONSE, "AI 응답 포맷 오류");
 
         } catch(RestClientException e){
             // 네트워크, 타임아웃

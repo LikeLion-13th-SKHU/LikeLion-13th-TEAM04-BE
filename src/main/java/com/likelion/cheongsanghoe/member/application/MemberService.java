@@ -27,6 +27,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
+    private final com.likelion.cheongsanghoe.portfolio.domain.repository.PortfolioRepository portfolioRepository;
 
     @Transactional
     public MemberInfoResponseDto createMemberProfileByEmail(String email, MemberUpdateRequestDto requestDto) {
@@ -119,8 +120,28 @@ public class MemberService {
         Member member = memberRepository.findByUser(user)
                 .orElseThrow(() -> new MemberNotFoundException("회원 정보를 찾을 수 없습니다."));
 
-        member.withdraw();
-        log.info("Member withdrawn successfully. MemberId: {}", member.getId());
+        Long memberId = member.getId();
+        Long userId = user.getId();
+
+        try {
+
+            portfolioRepository.deleteByMember(member);
+            log.info("Portfolio data deleted for MemberId: {}", memberId);
+
+
+            memberRepository.delete(member);
+            log.info("Member deleted successfully. MemberId: {}", memberId);
+
+
+            userRepository.delete(user);
+            log.info("User deleted successfully. UserId: {}, Email: {}", userId, email);
+
+            log.info("Complete withdrawal successful for email: {}", email);
+
+        } catch (Exception e) {
+            log.error("Error during withdrawal for email: {}, Error: {}", email, e.getMessage());
+            throw new RuntimeException("회원 탈퇴 처리 중 오류가 발생했습니다.", e);
+        }
     }
 
     @Transactional(readOnly = true)

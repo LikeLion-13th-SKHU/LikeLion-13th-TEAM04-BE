@@ -89,7 +89,7 @@ public class Member {
                   String jobCategory, String preferredLocation, String skills,
                   Integer experienceYears, String education, Integer salaryExpectation,
                   MemberStatus status,
-                  BotType botType) { // status 추가
+                  BotType botType) {
         this.user = user;
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
@@ -104,10 +104,9 @@ public class Member {
         this.experienceYears = experienceYears;
         this.education = education;
         this.salaryExpectation = salaryExpectation;
-        this.status = status; // status 필드 초기화
+        this.status = status;
         this.botType = botType;
     }
-
 
     public void updateProfile(String nickname, String phoneNumber, String address, String detailAddress,
                               String zipCode, String bio, String jobCategory, String preferredLocation,
@@ -131,9 +130,6 @@ public class Member {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public void withdraw() {
-        this.status = MemberStatus.WITHDRAWN;
-    }
 
     public boolean isActive() {
         return this.status == MemberStatus.ACTIVE;
