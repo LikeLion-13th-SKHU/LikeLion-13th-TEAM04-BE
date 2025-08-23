@@ -32,6 +32,9 @@ public enum ErrorStatus {
     DUPLICATE_PHONE_NUMBER(HttpStatus.CONFLICT, "MEMBER409", "이미 사용 중인 전화번호입니다."),
     MEMBER_SUSPENDED(HttpStatus.FORBIDDEN, "MEMBER403", "정지된 회원입니다."),//정지된 회원을 넣은 이유는 구인구직 사이트에서 사기 치는 유저가 생길 가능성을 생각해서 넣었습니다.
     MEMBER_NOT_ACTIVE(HttpStatus.FORBIDDEN, "MEMBER403", "활성화되지 않은 회원입니다."),
+    MEMBER_WITHDRAWAL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "MEMBER500", "회원 탈퇴 처리 중 오류가 발생했습니다."),
+    MEMBER_ALREADY_WITHDRAWN(HttpStatus.BAD_REQUEST, "MEMBER400", "이미 탈퇴한 회원입니다."),
+    MEMBER_DATA_DELETION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "MEMBER500", "회원 관련 데이터 삭제 중 오류가 발생했습니다."),
 
     //chat
     CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT404", "존재하지 않는 채팅방입니다."),
