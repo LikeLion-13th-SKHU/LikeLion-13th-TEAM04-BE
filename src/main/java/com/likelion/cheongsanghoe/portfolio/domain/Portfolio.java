@@ -75,11 +75,11 @@ public class Portfolio {
         this.skills = skills;
         this.experience = experience;
         this.hourlyRate = hourlyRate;
-        // AvailableTime이 null로 들어올 경우를 대비한 기본값 처리
+
         this.availableTime = availableTime != null ? availableTime : new AvailableTime(false, false, false, false);
     }
 
-    // Update 메서드: null 값은 덮어쓰지 않음
+
     public void update(String title, String content, String projectUrl, String thumbnailUrl,
                        String category, String skills, String experience, String hourlyRate, AvailableTime availableTime) {
         if (title != null) this.title = title;

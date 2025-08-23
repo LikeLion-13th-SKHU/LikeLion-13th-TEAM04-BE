@@ -2,7 +2,9 @@ package com.likelion.cheongsanghoe.auth.security.oauth2;
 
 import com.likelion.cheongsanghoe.auth.domain.User;
 import com.likelion.cheongsanghoe.auth.domain.repository.UserRepository;
+import com.likelion.cheongsanghoe.member.domain.Member;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -13,6 +15,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
@@ -22,18 +25,31 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        com.likelion.cheongsanghoe.auth.security.oauth2.OAuth2UserInfo userInfo = com.likelion.cheongsanghoe.auth.security.oauth2.OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId, oAuth2User.getAttributes());
+        OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId, oAuth2User.getAttributes());
 
         User user = getOrCreateUser(userInfo);
 
-        return com.likelion.cheongsanghoe.auth.security.oauth2.UserPrincipal.create(user, oAuth2User.getAttributes());
+        return UserPrincipal.create(user, oAuth2User.getAttributes());
     }
 
-    private User getOrCreateUser(com.likelion.cheongsanghoe.auth.security.oauth2.OAuth2UserInfo userInfo) {
+    private User getOrCreateUser(OAuth2UserInfo userInfo) {
         Optional<User> userOptional = userRepository.findByEmail(userInfo.getEmail());
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
+
+            Member member = user.getMember();
+            if (member != null) {
+
+                if (!member.isActive()) {
+                    log.warn("비활성 상태(탈퇴한) 사용자의 로그인 시도: {}, Member Status: {}",
+                            userInfo.getEmail(), member.getStatus());
+                    throw new OAuth2AuthenticationException("탈퇴한 사용자는 로그인할 수 없습니다.");
+                }
+
+                log.debug("기존 활성 사용자 로그인: {}, Member ID: {}", userInfo.getEmail(), member.getId());
+            }
+
             // 기존 사용자 정보 업데이트
             user.updateProfile(userInfo.getName(), userInfo.getImageUrl());
             return userRepository.save(user);

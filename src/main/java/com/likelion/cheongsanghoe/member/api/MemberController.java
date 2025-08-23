@@ -128,15 +128,28 @@ public class MemberController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 탈퇴 성공"),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
-            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
+            @ApiResponse(responseCode = "500", description = "탈퇴 처리 중 오류 발생")
     })
     public ResponseEntity<Map<String, String>> withdrawMember(Authentication authentication) {
         log.info("Withdrawing member for user: {}", authentication.getName());
-        String email = authentication.getName();
-        memberService.withdrawMemberByEmail(email);
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "회원 탈퇴가 완료되었습니다.");
-        return ResponseEntity.ok(response);
+
+        try {
+            String email = authentication.getName();
+            memberService.withdrawMemberByEmail(email);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "회원 탈퇴가 완료되었습니다.");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Failed to withdraw member: {}, Error: {}", authentication.getName(), e.getMessage());
+
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "회원 탈퇴 처리 중 오류가 발생했습니다.");
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
     }
 
     @GetMapping("/check/nickname")
