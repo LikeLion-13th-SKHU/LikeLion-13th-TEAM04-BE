@@ -1,6 +1,7 @@
 package com.likelion.cheongsanghoe.chatbot.api;
 
 import com.likelion.cheongsanghoe.chatbot.api.dto.AiChatReq;
+import com.likelion.cheongsanghoe.chatbot.api.dto.AiChatRes;
 import com.likelion.cheongsanghoe.chatbot.api.dto.AiMatchCard;
 import com.likelion.cheongsanghoe.chatbot.application.AiClient;
 import com.likelion.cheongsanghoe.exception.Response;
@@ -27,14 +28,17 @@ public class AiChatController {
 
     @Operation(summary = "AI 대화", description = "프->백 (/ai/chat) -> Flast(AI)(/chat)")
     @PostMapping("/chat")
-    public ResponseEntity<Response<List<AiMatchCard>>> chat(@RequestBody AiChatReq request) {
+    public ResponseEntity<Response<AiChatRes>> chat(@RequestBody AiChatReq request) {
         // 원문 받기
         Map<String, Object> ai = aiClient.askRaw(request.roomId(), request.userId(), request.text());
         // data.results 꺼내기
         @SuppressWarnings("unchecked")
-        Map<String, Object> dat = (Map<String, Object>) ai.get("data");
+        Map<String, Object> dat = (Map<String, Object>) ai.getOrDefault("data", Map.of());
+        String reply = String.valueOf(dat.getOrDefault("reply", "")).trim();
+
         @SuppressWarnings("unchecked")
-        List<Map<String, Object>> results = (List<Map<String, Object>>) dat.get("results");
+        List<Map<String, Object>> results =
+                (List<Map<String, Object>>) dat.getOrDefault("results", List.of());
 
         List<AiMatchCard> cards = results.stream()
                 .map(r -> AiMatchCard.builder()
@@ -49,7 +53,12 @@ public class AiChatController {
                         .build())
                 .toList();
 
-        return ResponseEntity.ok(Response.success(SuccessStatus.SUCCESS, cards));
+        AiChatRes body = AiChatRes.builder()
+                .reply(reply)
+                .results(cards)
+                .build();
+
+        return ResponseEntity.ok(Response.success(SuccessStatus.SUCCESS, body));
     }
 
     private Integer toPercent(Object score) {
