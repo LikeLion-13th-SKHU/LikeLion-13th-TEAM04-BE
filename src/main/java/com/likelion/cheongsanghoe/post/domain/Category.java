@@ -29,9 +29,9 @@ public enum Category {
 
     @JsonCreator
     public static Category from(String input) {
-        if (input == null) {
-            throw new CustomException(ErrorStatus.INVALID_PARAMETER,
-                    ErrorStatus.INVALID_BODY.getCode());
+        //input이 null이거나 빈 문자열이면 Category.ALL을 반환
+        if (input == null || input.trim().isEmpty()) {
+            return ALL;
         }
         String trimmed = input.trim();
 
