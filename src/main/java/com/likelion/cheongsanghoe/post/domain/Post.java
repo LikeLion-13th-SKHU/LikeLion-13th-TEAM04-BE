@@ -1,5 +1,6 @@
 package com.likelion.cheongsanghoe.post.domain;
 
+import com.likelion.cheongsanghoe.auth.domain.User;
 import com.likelion.cheongsanghoe.post.api.dto.request.PostUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -35,9 +36,13 @@ public class Post {
     @Column(length =20)
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)//외래키
+    private User user;
+
     @Builder
     private Post(String title, String content, String location, Integer salary, String work_time, String tags,String deadline,
-                 int num, String work_period, LocalDate createAt, Category category, String imageUrl ) {
+                 int num, String work_period, LocalDate createAt, Category category, String imageUrl, User user) {
         this.title = title;
         this.content = content;
         this.location = location;
@@ -50,6 +55,7 @@ public class Post {
         this.createAt = createAt;
         this.category = category;
         this.imageUrl = imageUrl;
+        this.user = user;
 
     }
     //공고 수정

@@ -41,9 +41,15 @@ public record PostInfoResponseDto(
         LocalDate createAt,
 
         @Schema(description = "카테고리", example = "카페")
-        Category category
+        Category category,
+
+        @Schema(description = "현재 로그인한 사용자가 이 공고의 작성자인지 여부", example = "true")
+        boolean isUser,
+
+        @Schema(description = "공고 작성한 사용자 ID", example = "1")
+        Long postUserId
 ) {
-    public static PostInfoResponseDto from(Post post){
+    public static PostInfoResponseDto from(Post post, boolean isUser){
         return PostInfoResponseDto.builder()
                 .title(post.getTitle())
                 .content(post.getContent())
@@ -56,6 +62,8 @@ public record PostInfoResponseDto(
                 .work_period(post.getWork_period())
                 .createAt(post.getCreateAt())
                 .category(post.getCategory())
+                .isUser(isUser)
+                .postUserId(post.getUser() != null ? post.getUser().getId() : null)
                 .build();
     }
 }
