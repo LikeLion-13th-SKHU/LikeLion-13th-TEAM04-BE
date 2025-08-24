@@ -37,7 +37,7 @@ public class ChatRoom {
     private Long postId; // 게시글과 연계
 
     @Builder
-    public ChatRoom(String name, Long creatorId, Long participantId, Long postId) {
+    public ChatRoom(String name, Long creatorId, Long participantId, Long postId, Long botUserId) {
         this.name = name;
         this.creatorId = creatorId;
         this.participantId = participantId;

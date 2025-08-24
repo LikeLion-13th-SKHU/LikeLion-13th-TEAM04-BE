@@ -24,7 +24,40 @@ public class ChatRoomService {
         return chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.CHATROOM_NOT_FOUND));
     }
-    // 같은 사람이면 기존 채팅방 사용, 없으면 새로 생성
+
+    // 챗봇 : 항상 새 방
+    @Transactional
+    public Long createBotRoom(Long myId, Long botUserId, String roomName){
+        if(Objects.equals(myId, botUserId)){
+            throw new CustomException(ErrorStatus.NOT_ALLOWED_SELF_CHAT);
+        }
+        ChatRoom room = ChatRoom.builder()
+                .name(roomName)
+                .creatorId(myId)
+                .participantId(botUserId)
+                .postId(null)
+                .botUserId(botUserId) // 봇 방
+                .build();
+        return chatRoomRepository.save(room).getId();
+    }
+
+    // 사람 채팅방도 항상 새방이 필요할 때 사용
+    @Transactional
+    public Long createRoom(Long myId, Long otherUserId, String roomName, Long postId){
+        if(Objects.equals(myId, otherUserId)){
+            throw new CustomException(ErrorStatus.NOT_ALLOWED_SELF_CHAT);
+        }
+        ChatRoom room = ChatRoom.builder()
+                .name(roomName)
+                .creatorId(myId)
+                .participantId(otherUserId)
+                .postId(postId)
+                .botUserId(null) // 일반 방
+                .build();
+        return chatRoomRepository.save(room).getId();
+    }
+
+    // 같은 조합의 사람이면 재사용, 없으면 생성
     @Transactional
     public Long getOrCreateDirectRoom(Long myId, Long otherUserId, String roomName, Long postId){
         if(Objects.equals(myId, otherUserId)){
@@ -33,15 +66,7 @@ public class ChatRoomService {
         return chatRoomRepository
                 .findRoomByMembersAndOptionalPostId(myId, otherUserId, postId)
                 .map(ChatRoom::getId)
-                .orElseGet(() -> {
-                    ChatRoom room = ChatRoom.builder()
-                            .name(roomName)
-                            .creatorId(myId)
-                            .participantId(otherUserId)
-                            .postId(postId)
-                            .build();
-                    return chatRoomRepository.save(room).getId();
-                });
+                .orElseGet(() -> createRoom(myId, otherUserId, roomName, postId));
     }
 
     // 나의 채팅방 조회
