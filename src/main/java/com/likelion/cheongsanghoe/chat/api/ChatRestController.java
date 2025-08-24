@@ -51,11 +51,10 @@ public class ChatRestController {
                     .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND))
                     .getUser().getId();
 
-            roomId = chatRoomService.getOrCreateDirectRoom(
+            roomId = chatRoomService.createBotRoom(
                     myId,
                     botUserId,
-                    (req.getRoomName() == null ? "AI Bot" : req.getRoomName()), // 프엔 생략 가능
-                    null
+                    (req.getRoomName() == null ? "AI Bot" : req.getRoomName()) // 프엔 생략 가능
             );
         } else {
             if(req.getOtherUserId() == null){
