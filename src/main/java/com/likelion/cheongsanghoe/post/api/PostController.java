@@ -70,7 +70,8 @@ public class PostController {
     //postId로 공고 상세 조회
     @Operation(summary = "postId로 공고 상세 조회", description = "postId로 공고 상세조회")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "공고 조회 성공"),
+            @ApiResponse(responseCode = "200", description = "공고 조회 성공",
+            content = @Content(schema = @Schema(implementation = PostInfoResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "공고를 찾을 수 없음")
     })
     @GetMapping("/{postId}")
@@ -81,8 +82,7 @@ public class PostController {
     //공고 전체 조회(요약 정보)
     @Operation(summary = "공고 전체 조회(요약된 공고 정보), 키워드랑 카테고리 쿼리 파라미터로 받는다(검색기능)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "공고 조회 성공"),
-            @ApiResponse(responseCode = "404", description = "공고를 찾을 수 없음")
+            @ApiResponse(responseCode = "200", description = "공고 조회 성공")
     })
     @GetMapping
     public Response<PostPageResponseDto> postFindAll(
