@@ -12,7 +12,8 @@ public enum Category {
     LIFE("생활"),
     EDUCATION("교육"),
     CULTURE("문화"),
-    ADD("기타");
+    ADD("기타"),
+    ALL("전체조회");
 
     private final String label;
 
