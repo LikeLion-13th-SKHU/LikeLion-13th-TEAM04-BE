@@ -1,11 +1,14 @@
 package com.likelion.cheongsanghoe.post.application;
 
+import com.likelion.cheongsanghoe.auth.domain.User;
 import com.likelion.cheongsanghoe.auth.security.JwtTokenProvider;
 import com.likelion.cheongsanghoe.exception.CustomException;
 import com.likelion.cheongsanghoe.exception.Response;
 import com.likelion.cheongsanghoe.exception.status.ErrorStatus;
 import com.likelion.cheongsanghoe.exception.status.SuccessStatus;
 import com.likelion.cheongsanghoe.mainpage.api.dto.response.MainCategoryResponseDto;
+import com.likelion.cheongsanghoe.member.domain.Member;
+import com.likelion.cheongsanghoe.member.domain.repository.MemberRepository;
 import com.likelion.cheongsanghoe.post.api.dto.request.PostUpdateRequestDto;
 import com.likelion.cheongsanghoe.post.api.dto.response.*;
 import com.likelion.cheongsanghoe.post.domain.Category;
@@ -17,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +37,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class PostService {
     private final PostRepository postRepository;
+    private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     //공고 저장
@@ -45,6 +51,9 @@ public class PostService {
         if(userEmail == null){
             throw new CustomException(ErrorStatus.INVALID_TOKEN);
         }
+        User user = memberRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new CustomException(ErrorStatus.USER_NOT_FOUND))
+                .getUser();
         //이미지 업로드 처리
         String imgaeUrl = null;
         if(postSaveRequestDto.image() != null && !postSaveRequestDto.image().isEmpty()){
@@ -83,6 +92,7 @@ public class PostService {
                 .createAt(LocalDate.now()) //실시간 서버 시간 적용
                 .category(postSaveRequestDto.category())
                 .imageUrl(imgaeUrl)
+                .user(user)
                 .build();
         postRepository.save(post);
         return Response.success(SuccessStatus.POST_CREATED, post.getPostId());
@@ -92,8 +102,33 @@ public class PostService {
     public PostInfoResponseDto getPostId(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.POST_NOT_FOUND));
-        return PostInfoResponseDto.from(post);
+
+        Long currentUserId = getCurrentUserId();
+
+        boolean isUser = false;
+        if(currentUserId != null && post.getUser() != null){
+            isUser = currentUserId.equals(post.getUser().getId());
+        }
+        return PostInfoResponseDto.from(post, isUser);
     }
+    private Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return null; // 로그인하지 않은 상태
+        }
+
+        // Authentication 객체에서 Principal (이메일) 가져오기
+        String userEmail = authentication.getName();
+
+        // MemberRepository를 사용하여 해당 이메일로 Member 엔티티 찾기.
+        Member currentMember = memberRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new CustomException(ErrorStatus.USER_NOT_FOUND)); // 해당 이메일의 Member를 찾을 수 없으면 예외 발생
+
+        // 찾은 Member에서 연결된 User 엔티티를 통해 UserId반환.
+        return currentMember.getUser().getId();
+    }
+
 
     //공고 수정
     @Transactional
