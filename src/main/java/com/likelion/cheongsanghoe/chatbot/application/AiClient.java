@@ -48,7 +48,7 @@ public class AiClient {
 
         try{
             var res = client.post()
-                    .uri("/chat/ask")
+                    .uri("/chat")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(json)
                     .retrieve()
@@ -101,7 +101,7 @@ public class AiClient {
 
         try{
             return client.post()
-                    .uri("/chat/ask")
+                    .uri("/chat")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(json)
                     .retrieve()
