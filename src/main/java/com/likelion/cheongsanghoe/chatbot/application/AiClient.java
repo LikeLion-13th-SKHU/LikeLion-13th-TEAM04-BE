@@ -13,12 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -89,6 +84,35 @@ public class AiClient {
 
         } catch(RestClientException e){
             // 네트워크, 타임아웃
+            if (e.getCause() instanceof SocketTimeoutException) {
+                throw new CustomException(ErrorStatus.AI_TIMEOUT, "AI 응답 시간 초과: " + e.getMessage());
+            }
+            throw new CustomException(ErrorStatus.AI_CLIENT_ERROR, "AI 호출 실패: " + e.getMessage());
+        }
+    }
+
+    public Map<String, Object> askRaw(Long roomId, Long humanMemberId, String text) {
+        Map<String, Object> body = Map.of(
+                "roomId", roomId,
+                "userId", humanMemberId,
+                "text", text
+        );
+        String json = toJson(body);
+
+        try{
+            return client.post()
+                    .uri("/chat/ask")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(json)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, (req, r) -> {
+                        throw new CustomException(ErrorStatus.AI_CLIENT_ERROR, "AI 4xx: " + r.getStatusCode());
+                            })
+                    .onStatus(HttpStatusCode::is5xxServerError, (req, r) -> {
+                        throw new CustomException(ErrorStatus.AI_SERVER_ERROR, "AI 5xx: " + r.getStatusCode());
+                    })
+                    .body(Map.class);
+        } catch (RestClientException e){
             if (e.getCause() instanceof SocketTimeoutException) {
                 throw new CustomException(ErrorStatus.AI_TIMEOUT, "AI 응답 시간 초과: " + e.getMessage());
             }
