@@ -89,9 +89,10 @@ public class ChatRestController {
     @Operation(summary = "메시지 히스토리 조회")
     @GetMapping("/rooms/{roomId}/messages")
     public ResponseEntity<Response<MessageHistoryRes>>history(@PathVariable Long roomId,
+                                                              @AuthenticationPrincipal(expression = "id") Long myId,
                                                               @RequestParam(required = false) Long cursor,
                                                               @RequestParam(defaultValue = "50") int size) {
-        var slice = chatMessageService.getHistory(roomId, cursor, size);
+        var slice = chatMessageService.getHistory(roomId, cursor, size, myId);
         var content = slice.content().stream().map(ChatMessageRes::from).toList();
         var body = MessageHistoryRes.from(content, slice.hasNext(), slice.nextCursor());
         return ResponseEntity.ok(
