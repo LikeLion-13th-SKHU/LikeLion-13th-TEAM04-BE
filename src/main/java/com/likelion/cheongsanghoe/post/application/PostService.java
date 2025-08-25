@@ -135,7 +135,41 @@ public class PostService {
     public void postUpdate(Long postId, PostUpdateRequestDto postUpdateRequestDto) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.POST_NOT_FOUND));
-        post.update(postUpdateRequestDto);
+
+        // 이미지 업로드 처리
+        String imageUrl = post.getImageUrl(); // 기존 이미지 유지
+        if (postUpdateRequestDto.imageUrl() != null && !postUpdateRequestDto.imageUrl().isEmpty()) {
+            try {
+                String originalFilename = postUpdateRequestDto.imageUrl().getOriginalFilename();
+                String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                String fileName = UUID.randomUUID().toString() + extension;
+
+                String uploadDir = System.getProperty("user.dir") + "/uploads";
+                File dir = new File(uploadDir);
+                if (!dir.exists()) dir.mkdirs();
+
+                File dest = new File(uploadDir + "/" + fileName);
+                postUpdateRequestDto.imageUrl().transferTo(dest);
+
+                imageUrl = "/uploads/" + fileName; // 새 URL
+            } catch (IOException e) {
+                throw new CustomException(ErrorStatus.IMAGE_UPLOAD_FAILED);
+            }
+        }
+
+        post.update(
+                postUpdateRequestDto.title(),
+                postUpdateRequestDto.content(),
+                postUpdateRequestDto.location(),
+                postUpdateRequestDto.salary(),
+                postUpdateRequestDto.work_time(),
+                postUpdateRequestDto.tags(),
+                postUpdateRequestDto.deadline(),
+                postUpdateRequestDto.num(),
+                postUpdateRequestDto.work_period(),
+                postUpdateRequestDto.getCategory(),
+                imageUrl
+        );
     }
     //공고 삭제
     @Transactional

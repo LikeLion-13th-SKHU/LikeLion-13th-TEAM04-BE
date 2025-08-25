@@ -114,8 +114,8 @@ public class PostController {
             @ApiResponse(responseCode ="400", description = "잘못된 요청 데이터"),
             @ApiResponse(responseCode = "403", description = "수정 권한 없음"),
     })
-    @PatchMapping("/{postId}")
-    public Response<PostInfoResponseDto> postUpdate(@PathVariable("postId")Long postId, @RequestBody PostUpdateRequestDto postUpdateRequestDto) {
+    @PatchMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Response<PostInfoResponseDto> postUpdate(@PathVariable("postId")Long postId, @ModelAttribute @Valid PostUpdateRequestDto postUpdateRequestDto) {
         postService.postUpdate(postId, postUpdateRequestDto);
         PostInfoResponseDto postInfoResponseDto = postService.getPostId(postId);
         return Response.success(SuccessStatus.POST_UPDATED,postInfoResponseDto);
