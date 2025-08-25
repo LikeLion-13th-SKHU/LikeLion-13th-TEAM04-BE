@@ -20,10 +20,10 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     // 특정 사용자가 참여 중인 모든 채팅방 조회 (최신순)
     @Query("""
-        select c from ChatRoom c
-        where c.botUserId is not null and c.creatorId = :userId or c.participantId = :userId
-        order by c.createdAt desc
-        """)
+            select c from ChatRoom c
+            where c.botUserId is null and (c.creatorId = :userId or c.participantId = :userId)
+            order by c.createdAt desc
+            """)
     public List<ChatRoom> findRoomsByUserId(Long userId);
 
     // 전체 채팅방 조회 (최신순)
