@@ -47,7 +47,10 @@ public record PostInfoResponseDto(
         boolean isUser,
 
         @Schema(description = "공고 작성한 사용자 ID", example = "1")
-        Long postUserId
+        Long postUserId,
+
+        @Schema(description = "이미지 URL", example = "/uploads/uuid.jpg")
+        String imageUrl
 ) {
     public static PostInfoResponseDto from(Post post, boolean isUser){
         return PostInfoResponseDto.builder()
@@ -64,6 +67,7 @@ public record PostInfoResponseDto(
                 .category(post.getCategory())
                 .isUser(isUser)
                 .postUserId(post.getUser() != null ? post.getUser().getId() : null)
+                .imageUrl(post.getImageUrl())
                 .build();
     }
 }

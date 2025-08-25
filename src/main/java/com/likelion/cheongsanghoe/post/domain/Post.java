@@ -59,14 +59,22 @@ public class Post {
 
     }
     //공고 수정
-    public void update(PostUpdateRequestDto postUpdateRequestDto) {
-        this.title = postUpdateRequestDto.title();
-        this.salary = postUpdateRequestDto.salary();
-        this.num = postUpdateRequestDto.num();
-        this.work_time = postUpdateRequestDto.work_time();
-        this.work_period = postUpdateRequestDto.work_period();
-        this.content = postUpdateRequestDto.content();
-        this.deadline = postUpdateRequestDto.deadline();
+    public void update(String title, String content, String location, int salary,
+                       String work_time, String tags, String deadline, int num,
+                       String work_period, Category category, String imageUrl) {
+        this.title = title;
+        this.content = content;
+        this.location = location;
+        this.salary = salary;
+        this.work_time = work_time;
+        this.tags = tags;
+        this.deadline = deadline;
+        this.num = num;
+        this.work_period = work_period;
+        this.category = category;
+        this.imageUrl = imageUrl;
+        this.createAt = LocalDate.now();
+
     }
 
 
