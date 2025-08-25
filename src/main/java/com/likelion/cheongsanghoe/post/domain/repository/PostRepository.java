@@ -23,4 +23,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "(:category IS NULL OR p.category = :category)")
     Page<Post> findKeywordAndCategory(@org.springframework.data.repository.query.Param("keyword") String keyword,
                                       @org.springframework.data.repository.query.Param("category") Category category, Pageable pageable);
+
+    //제목, 내용, 카테고리로 검색
+    @Query("SELECT p FROM Post p WHERE " +
+            "(:keyword IS NULL OR :keyword = '' OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Post> findKeyword(@org.springframework.data.repository.query.Param("keyword") String keyword, Pageable pageable);
 }

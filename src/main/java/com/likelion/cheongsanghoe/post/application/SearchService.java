@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +27,12 @@ public class SearchService {
         Category searchCategory = (category == null || category == Category.ALL) ? null : category;
 
         // keyword도 null이거나 비어있으면 전체 검색으로 동작
-        Page<Post> allPosts = postRepository.findKeywordAndCategory(keyword, searchCategory, pageable);
+        Page<Post> allPosts;
+        if (searchCategory == null) {
+            allPosts = postRepository.findKeyword(keyword, pageable);
+        } else {
+            allPosts = postRepository.findKeywordAndCategory(keyword, searchCategory, pageable);
+        }
 
         //DB에서 페이징된 Post 객체들을 Dto로 매핑해서 반환
         return allPosts.map(PostSummaryResponseDto::from);

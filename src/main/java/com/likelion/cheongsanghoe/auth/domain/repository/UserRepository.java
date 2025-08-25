@@ -30,10 +30,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("""
         select new com.likelion.cheongsanghoe.chat.api.dto.res.ChatParticipantProfileRes(
-            u.id, u.name, u.profileImage
+            m.id, m.nickname, m.profileImageUrl
         )
-        from User u
-        where u.id = :userId
+        from Member m
+        where m.id = :memberId
     """)
-    Optional<ChatParticipantProfileRes> findParticipantProfileById(@Param("userId") Long userId);
+    Optional<ChatParticipantProfileRes> findParticipantProfileById(@Param("memberId") Long memberId);
 }

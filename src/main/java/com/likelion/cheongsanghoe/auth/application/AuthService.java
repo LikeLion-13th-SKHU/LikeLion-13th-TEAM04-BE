@@ -88,6 +88,7 @@ public class AuthService {
                 User newUser = User.builder()
                         .email(email)
                         .name(name)
+                        .profileImage(picture)
                         .build();
 
                 User savedUser = userRepository.save(newUser);
