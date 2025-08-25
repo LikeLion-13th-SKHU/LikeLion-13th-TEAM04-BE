@@ -35,6 +35,10 @@ public enum Category {
         }
         String trimmed = input.trim();
 
+        if("ALL".equals(trimmed) || "전체조회".equals(trimmed)){
+            return ALL;
+        }
+
         for (Category c : values()) {
             if (c.name().equalsIgnoreCase(trimmed) || c.label.equalsIgnoreCase(trimmed)) {
                 return c;
