@@ -72,8 +72,7 @@ public class ChatRestController {
     public ResponseEntity<Response<List<ChatRoomRes>>> myRooms(
             @AuthenticationPrincipal(expression = "id") Long myId
     ) {
-        List<ChatRoom> rooms = chatRoomService.getRoomsByUser(myId);
-        List<ChatRoomRes> body = rooms.stream().map(ChatRoomRes::from).toList();
+        List<ChatRoomRes> body = chatRoomService.getRoomsByUserWithParticipants(myId);
         return ResponseEntity.ok(Response.success(SuccessStatus.SUCCESS, body));
     }
 

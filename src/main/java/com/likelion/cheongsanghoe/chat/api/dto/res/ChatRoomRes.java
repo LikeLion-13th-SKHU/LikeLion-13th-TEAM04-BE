@@ -22,7 +22,10 @@ public record ChatRoomRes(
         Long postId,
 
         @Schema(description = "생성 시각")
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+
+        @Schema(description = "상대 프로필")
+        ChatParticipantProfileRes participantProfile
 ) {
     public static ChatRoomRes from(ChatRoom chatRoom) {
         return new ChatRoomRes(
@@ -31,7 +34,19 @@ public record ChatRoomRes(
                 chatRoom.getCreatorId(),
                 chatRoom.getParticipantId(),
                 chatRoom.getPostId(),
-                chatRoom.getCreatedAt()
+                chatRoom.getCreatedAt(),
+                null
+        );
+    }
+    public static ChatRoomRes from(ChatRoom chatRoom, ChatParticipantProfileRes profile) {
+        return new ChatRoomRes(
+                chatRoom.getId(),
+                chatRoom.getName(),
+                chatRoom.getCreatorId(),
+                chatRoom.getParticipantId(),
+                chatRoom.getPostId(),
+                chatRoom.getCreatedAt(),
+                profile
         );
     }
 }

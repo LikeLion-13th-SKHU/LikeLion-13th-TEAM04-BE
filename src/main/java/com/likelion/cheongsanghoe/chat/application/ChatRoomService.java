@@ -1,5 +1,8 @@
 package com.likelion.cheongsanghoe.chat.application;
 
+import com.likelion.cheongsanghoe.auth.domain.repository.UserRepository;
+import com.likelion.cheongsanghoe.chat.api.dto.res.ChatParticipantProfileRes;
+import com.likelion.cheongsanghoe.chat.api.dto.res.ChatRoomRes;
 import com.likelion.cheongsanghoe.chat.domain.ChatRoom;
 import com.likelion.cheongsanghoe.chat.domain.repository.ChatRoomRepository;
 import com.likelion.cheongsanghoe.exception.CustomException;
@@ -10,13 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final UserRepository userRepository;
 
     // 채팅방 단건 조회
     @Transactional(readOnly = true)
@@ -84,6 +87,22 @@ public class ChatRoomService {
         if(!isMember){
             throw new CustomException(ErrorStatus.NOT_CHAT_ROOM_MEMBER);
         }
+    }
+
+    // 참가자 프로필 목록 조회
+    @Transactional(readOnly = true)
+    public List<ChatRoomRes> getRoomsByUserWithParticipants(Long userId){
+        List<ChatRoom> rooms = chatRoomRepository.findRoomsByUserId(userId);
+
+        return rooms.stream().map(r -> {
+            Long opponentUserId = Objects.equals(r.getCreatorId(), userId)
+                    ? r.getParticipantId() : r.getCreatorId();
+
+            ChatParticipantProfileRes profile = userRepository.findParticipantProfileById(opponentUserId)
+                    .orElse(new ChatParticipantProfileRes(opponentUserId, "Unknown", null));
+
+            return ChatRoomRes.from(r, profile);
+        }).toList();
     }
 
     // 방 삭제

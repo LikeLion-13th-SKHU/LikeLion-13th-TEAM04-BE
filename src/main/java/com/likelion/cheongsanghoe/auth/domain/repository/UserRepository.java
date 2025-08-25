@@ -2,6 +2,7 @@ package com.likelion.cheongsanghoe.auth.domain.repository;
 
 import com.likelion.cheongsanghoe.auth.domain.Role;
 import com.likelion.cheongsanghoe.auth.domain.User;
+import com.likelion.cheongsanghoe.chat.api.dto.res.ChatParticipantProfileRes;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +27,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByRoleAndNameContaining(@Param("role") Role role, @Param("name") String name);
 
     long countByRole(Role role);
+
+    @Query("""
+        select new com.likelion.cheongsanghoe.chat.api.dto.res.ChatParticipantProfileRes(
+            u.id, u.name, u.profileImage
+        )
+        from User u
+        where u.id = :userId
+    """)
+    Optional<ChatParticipantProfileRes> findParticipantProfileById(@Param("userId") Long userId);
 }
