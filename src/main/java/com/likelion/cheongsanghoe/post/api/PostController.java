@@ -88,11 +88,13 @@ public class PostController {
     public Response<PostPageResponseDto> postFindAll(
             @Parameter(description = "공고 제목이나 내용을 입력하면 키워드로 검색", example = "20초 영상")
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Category category,
+            @RequestParam(required = false) String category,
             //PageableDefault로 페이지네이션 기본값 적용, pageable 파라미터 추가
             @PageableDefault(size = 10, sort = "createAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<PostSummaryResponseDto> postPageDto = searchService.searchPosts(keyword, category, pageable);
+        Category categoryEnum = Category.from(category);
+
+        Page<PostSummaryResponseDto> postPageDto = searchService.searchPosts(keyword, categoryEnum, pageable);
 
         //PaginationDto 생성(페이지화 된 정보(postPageDto)를 가져온다)
         PaginationDto paginationDto = new PaginationDto(
