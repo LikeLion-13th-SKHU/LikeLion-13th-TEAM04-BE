@@ -28,7 +28,8 @@ public class ChatMessageService {
 
     // 메시지 히스토리 조회 (무한스크롤 커서)
     @Transactional(readOnly = true)
-    public Slice getHistory(Long roomId, Long cursor, int size){
+    public Slice getHistory(Long roomId, Long cursor, int size, Long userId){
+        chatRoomService.checkUserInRoom(roomId, userId);
         List<ChatMessage> list = chatMessageRepository.findSlice(roomId, cursor, PageRequest.of(0, size));
         Collections.reverse(list); // 오래된 -> 최신 순
         Long nextCursor = list.isEmpty() ? null : list.get(0).getId();
