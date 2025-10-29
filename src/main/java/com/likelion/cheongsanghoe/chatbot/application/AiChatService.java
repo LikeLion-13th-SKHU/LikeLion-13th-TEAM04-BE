@@ -23,7 +23,7 @@ public class AiChatService {
     private final SimpMessagingTemplate messagingTemplate;
     private final BotUserService botUserService;
 
-    // 이 방이 챗봇인지 참가자 id로 판별
+    // 이 방이 챗봇인지 참가자 id로 판별.
     @Async("aiExecutor")
     public void handleIfBotRoomAsync(ChatRoom room, ChatMessage userMsg){
         // 챗봇 방이 아니면
